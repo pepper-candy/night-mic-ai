@@ -64,16 +64,12 @@ export function SharePanel({
           Guests open the link or type that code. Easy to shout across the room.
         </p>
       </div>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-2">
         <Button className="h-12" variant="outline" onClick={() => void copy("code", code)}>
           {copied === "code" ? <CheckIcon data-icon="inline-start" /> : <CopyIcon data-icon="inline-start" />}
           Copy code
         </Button>
-        <Button className="h-12" variant="outline" onClick={() => void copy("link", shareUrl)}>
-          {copied === "link" ? <CheckIcon data-icon="inline-start" /> : <CopyIcon data-icon="inline-start" />}
-          Copy link
-        </Button>
-        <Button className="col-span-2 h-12 sm:col-span-1 neon-button" onClick={() => void nativeShare()}>
+        <Button className="h-12 neon-button" onClick={() => void nativeShare()}>
           <Share2Icon data-icon="inline-start" />
           Share
         </Button>

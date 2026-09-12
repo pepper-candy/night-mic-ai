@@ -36,6 +36,9 @@ export function SongRow({
   onCancel?: () => void;
   onMove?: (direction: "up" | "down") => void;
 }) {
+  const showHostQueueActions = Boolean(isHost && song.status === "queued" && (onPlay || onMove));
+  const showGuestCancel = Boolean(!isHost && isOwn && song.status === "queued" && onCancel);
+
   return (
     <article className="glow-panel p-3.5">
       <div className="flex items-start gap-3">
@@ -45,41 +48,56 @@ export function SongRow({
           </span>
         ) : null}
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="truncate text-base font-semibold leading-tight">{song.title}</h3>
-            {isOwn ? (
-              <Badge variant="secondary" className="bg-cyan/15 text-cyan">
-                You
-              </Badge>
+          <div className="flex items-start gap-2">
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="truncate text-base font-semibold leading-tight">{song.title}</h3>
+                {isOwn ? (
+                  <Badge variant="secondary" className="bg-cyan/15 text-cyan">
+                    You
+                  </Badge>
+                ) : null}
+              </div>
+              <p className="truncate text-sm text-muted-foreground">{song.artist}</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {song.submittedBy} · {timeAgo(song.createdAt)}
+              </p>
+              {song.url ? (
+                <a
+                  href={song.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-1 inline-flex items-center gap-1 text-sm text-cyan underline-offset-4 hover:underline"
+                >
+                  Open track
+                  <ExternalLinkIcon className="size-3.5" />
+                </a>
+              ) : null}
+            </div>
+            {isHost && onRemove ? (
+              <Button
+                variant="destructive"
+                size="icon"
+                className="size-11 shrink-0"
+                onClick={onRemove}
+                aria-label="Remove song"
+              >
+                <Trash2Icon />
+              </Button>
             ) : null}
           </div>
-          <p className="truncate text-sm text-muted-foreground">{song.artist}</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {song.submittedBy} · {timeAgo(song.createdAt)}
-          </p>
-          {song.url ? (
-            <a
-              href={song.url}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-1 inline-flex items-center gap-1 text-sm text-cyan underline-offset-4 hover:underline"
-            >
-              Open track
-              <ExternalLinkIcon className="size-3.5" />
-            </a>
-          ) : null}
         </div>
       </div>
 
-      {(isHost || (isOwn && song.status === "queued")) && (
+      {showHostQueueActions || showGuestCancel ? (
         <div className="mt-3 flex flex-wrap gap-2">
-          {isHost && song.status === "queued" && onPlay ? (
+          {showHostQueueActions && onPlay ? (
             <Button className="h-11 flex-1 text-sm" onClick={onPlay}>
               <PlayIcon data-icon="inline-start" />
               Now playing
             </Button>
           ) : null}
-          {isHost && song.status === "queued" && onMove ? (
+          {showHostQueueActions && onMove ? (
             <>
               <Button
                 variant="outline"
@@ -103,24 +121,14 @@ export function SongRow({
               </Button>
             </>
           ) : null}
-          {isHost && onRemove ? (
-            <Button
-              variant="destructive"
-              className="h-11 px-3"
-              onClick={onRemove}
-              aria-label="Remove song"
-            >
-              <Trash2Icon />
-            </Button>
-          ) : null}
-          {!isHost && isOwn && song.status === "queued" && onCancel ? (
+          {showGuestCancel ? (
             <Button variant="outline" className="h-11 flex-1" onClick={onCancel}>
               <XIcon data-icon="inline-start" />
               Cancel my song
             </Button>
           ) : null}
         </div>
-      )}
+      ) : null}
     </article>
   );
 }

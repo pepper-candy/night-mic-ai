@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { AppShell, BrandMark } from "@/components/karaoke/app-shell";
 import { CreateRoomButton } from "@/components/karaoke/create-room-button";
 import { JoinForm } from "@/components/karaoke/join-form";
@@ -46,10 +45,7 @@ export default function HomePage() {
 
       <footer className="mt-auto pt-10 text-center text-xs text-muted-foreground">
         Works on phones. Deep links look like{" "}
-        <span className="text-foreground">/room/VIBE42</span>.{" "}
-        <Link href="/join" className="text-cyan underline-offset-4 hover:underline">
-          Join page
-        </Link>
+        <span className="text-foreground">/room/VIBE42</span>.
       </footer>
     </AppShell>
   );

@@ -110,7 +110,7 @@ export function GuestRoom({ code }: { code: string }) {
         {room.upNext.length === 0 ? (
           <EmptyQueue
             title="The mic is lonely"
-            message="Be the first to grab it. Title + artist, then you're on the list."
+            message="Be the first to grab it. Then you're on the list."
           />
         ) : (
           room.upNext.map((song, index) => (
