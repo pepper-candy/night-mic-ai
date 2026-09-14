@@ -1,5 +1,9 @@
 # Night Mic
 
+Vercel: [Try it out on (night-mic.vercel.app)](night-mic.vercel.app)
+
+YouTube: [Demo Video](https://youtube.com/shorts/jjqzBw_ijX8?feature=share)
+
 A shared karaoke queue for a live party. The host opens a room, shouts a short code, and guests add songs from their phones. No install, no accounts — the room code is the door.
 
 Built with Next.js (App Router), TypeScript, and Tailwind. Designed for phones first.
