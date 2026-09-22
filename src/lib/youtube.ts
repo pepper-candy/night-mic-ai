@@ -45,10 +45,7 @@ export function youtubeApiKey(): string | undefined {
 export function assertYoutubeApiKey(): string {
   const key = youtubeApiKey();
   if (!key) {
-    throw new RoomError(
-      "YouTube Find link needs YOUTUBE_API_KEY. In Google Cloud, enable YouTube Data API v3, create an API key, and set it in Vercel (or .env.local).",
-      503,
-    );
+    throw new RoomError("YouTube search is unavailable.", 503);
   }
   return key;
 }
@@ -62,7 +59,7 @@ export function rateLimitYoutubeSearch(ip: string): void {
     return;
   }
   if (bucket.count >= SEARCH_MAX_PER_WINDOW) {
-    throw new RoomError("YouTube Find link is cooling down — try again in a minute.", 429);
+    throw new RoomError("YouTube search is unavailable.", 429);
   }
   bucket.count += 1;
 }
@@ -102,10 +99,7 @@ export function formatIsoDuration(iso: string | undefined): string | undefined {
 function throwYoutubeError(data: YoutubeApiErrorBody, status: number): never {
   const reason = data.error?.errors?.[0]?.reason;
   if (reason === "quotaExceeded" || reason === "dailyLimitExceeded") {
-    throw new RoomError(
-      "YouTube daily quota is used up (default 10,000 units, ~100 Find link taps). Paste a watch URL for now, or try again after the quota resets.",
-      429,
-    );
+    throw new RoomError("YouTube search is unavailable.", 429);
   }
   const message =
     stripText(data.error?.message ?? data.error?.errors?.[0]?.message ?? "", 180) ||

@@ -4,20 +4,20 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { searchYoutube } from "@/lib/api-client";
-import { youtubeKaraokeQuery } from "@/lib/media";
+import { youtubeKaraokeQuery, youtubeKaraokeSearchUrl } from "@/lib/media";
 import type { YoutubeSearchHit } from "@/lib/types";
 import { CheckIcon, ChevronLeftIcon, ChevronRightIcon, SearchIcon } from "lucide-react";
-
-const QUOTA_HINT = "Each Find link uses ~101 quota units (~100 finds/day).";
 
 export function YoutubeSearchPicker({
   title,
   artist,
   onPick,
+  onFindSpotify,
 }: {
   title: string;
   artist: string;
   onPick: (url: string) => void;
+  onFindSpotify?: () => void;
 }) {
   const [searching, setSearching] = useState(false);
   const [results, setResults] = useState<YoutubeSearchHit[]>([]);
@@ -26,6 +26,11 @@ export function YoutubeSearchPicker({
   const [finds, setFinds] = useState(0);
 
   const current = results[index];
+
+  function openYoutubeResults() {
+    window.open(youtubeKaraokeSearchUrl(title, artist), "_blank", "noreferrer");
+    toast.message("Pick a video on YouTube, then paste the link below.");
+  }
 
   async function findLink() {
     const q = youtubeKaraokeQuery(title, artist);
@@ -43,10 +48,11 @@ export function YoutubeSearchPicker({
       if (hits.length === 0) {
         setError("No YouTube matches. Paste a watch URL below, or try different title/artist.");
       }
-    } catch (err) {
+    } catch {
       setResults([]);
       setIndex(0);
-      setError(err instanceof Error ? err.message : "YouTube Find link failed.");
+      setError(null);
+      openYoutubeResults();
     } finally {
       setSearching(false);
     }
@@ -73,7 +79,15 @@ export function YoutubeSearchPicker({
         <SearchIcon data-icon="inline-start" />
         {searching ? "Finding link…" : finds > 0 ? "Find link again" : "Find link"}
       </Button>
-      <p className="text-xs text-muted-foreground">{QUOTA_HINT}</p>
+      {onFindSpotify ? (
+        <button
+          type="button"
+          className="block w-full text-center text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+          onClick={onFindSpotify}
+        >
+          Or find on Spotify
+        </button>
+      ) : null}
 
       {error ? <p className="text-sm text-gold">{error}</p> : null}
 
@@ -146,7 +160,7 @@ export function YoutubeSearchPicker({
 
           {index >= results.length - 1 ? (
             <p className="text-xs text-muted-foreground">
-              None of these? Paste a YouTube URL below, or tap Find link again ({QUOTA_HINT})
+              None of these? Paste a YouTube URL below, or tap Find link again.
             </p>
           ) : (
             <p className="text-xs text-muted-foreground">

@@ -76,7 +76,7 @@ Used only on the server (`/api/youtube/search`). The key is never sent to the br
 1. `search.list` — `q="{title} {artist} karaoke"`, `type=video`, `maxResults=5` (**100** quota units)
 2. `videos.list` — those 5 ids, `part=contentDetails,snippet` for duration (**~1** unit)
 
-Default daily quota is **10,000** units ⇒ about **100 Find link taps/day**. The UI never searches on keystroke. A second Find link is allowed but warned. Missing key and `quotaExceeded` show a clear message; guests can still paste a watch URL.
+Default daily quota is **10,000** units ⇒ about **100 Find link taps/day**. The UI never searches on keystroke and never mentions quota units to guests. If the key is missing or the API hits `quotaExceeded`, Find link opens a YouTube results page so they can paste a watch URL.
 
 **Persistence modes**
 

@@ -270,15 +270,12 @@ export function AddSongForm({
               />
             </div>
 
-            <YoutubeSearchPicker title={title} artist={artist} onPick={setLink} />
-
-            <button
-              type="button"
-              className="text-left text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-              onClick={findSongLink}
-            >
-              Or find on Spotify
-            </button>
+            <YoutubeSearchPicker
+              title={title}
+              artist={artist}
+              onPick={setLink}
+              onFindSpotify={findSongLink}
+            />
 
             <div className="space-y-1.5">
               <Label htmlFor="song-link">YouTube or Spotify link</Label>

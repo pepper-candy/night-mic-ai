@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { YoutubeSearchPicker } from "@/components/karaoke/youtube-search-picker";
 import { songAction } from "@/lib/api-client";
-import { assignMediaLink, combinedMediaLink } from "@/lib/media";
+import { assignMediaLink, combinedMediaLink, spotifyCatalogSearchUrl } from "@/lib/media";
 import { MAX_MESSAGE, MAX_URL, type PublicRoom, type QueueItem, type SongLanguage } from "@/lib/types";
 
 function EditSongForm({
@@ -112,7 +112,19 @@ function EditSongForm({
           />
         </div>
       ) : null}
-      <YoutubeSearchPicker title={title} artist={artist} onPick={setLink} />
+      <YoutubeSearchPicker
+        title={title}
+        artist={artist}
+        onPick={setLink}
+        onFindSpotify={() => {
+          const qTitle = title.trim();
+          if (!qTitle) {
+            toast.error("Type a song title first.");
+            return;
+          }
+          window.open(spotifyCatalogSearchUrl(qTitle, artist), "_blank", "noreferrer");
+        }}
+      />
       <div className="space-y-1.5">
         <Label htmlFor="edit-link">YouTube or Spotify link</Label>
         <Input
