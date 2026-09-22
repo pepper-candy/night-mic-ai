@@ -47,7 +47,7 @@ export function languageLabel(language: string, languageOther?: string): string 
   return language;
 }
 
-/** Google lyrics search — Cantonese uses 歌詞, everything else uses Lyrics. */
+/** Google lyrics search query — Cantonese uses 歌詞, everything else uses Lyrics. */
 export function lyricsSearchQuery(title: string, language?: string): string {
   const name = title.trim();
   if ((language || "english") === "cantonese") {
@@ -61,27 +61,4 @@ export function lyricsSearchUrl(title: string, language?: string): string {
   return `https://www.google.com/search?q=${encodeURIComponent(q)}`;
 }
 
-export function lyricsSearchButtonLabel(title: string, language?: string): string {
-  return `🔍${lyricsSearchQuery(title, language)}`;
-}
-
-/** Format a Date for <input type="datetime-local" /> in local timezone. */
-export function toDatetimeLocalValue(ms: number): string {
-  const d = new Date(ms);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
-export function formatEventWhen(ms: number): string {
-  try {
-    return new Intl.DateTimeFormat(undefined, {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    }).format(new Date(ms));
-  } catch {
-    return new Date(ms).toLocaleString();
-  }
-}
+export const LYRICS_BUTTON_LABEL = "🔍 Find me the Lyrics";

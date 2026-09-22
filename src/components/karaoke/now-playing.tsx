@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { languageLabel, lyricsSearchButtonLabel, lyricsSearchUrl } from "@/lib/media";
+import { languageLabel, LYRICS_BUTTON_LABEL, lyricsSearchUrl } from "@/lib/media";
 import { timeAgo } from "@/lib/time";
 import type { QueueItem } from "@/lib/types";
 import { ExternalLinkIcon, SkipForwardIcon } from "lucide-react";
@@ -10,10 +10,12 @@ import { ExternalLinkIcon, SkipForwardIcon } from "lucide-react";
 export function NowPlaying({
   song,
   isHost,
+  showLyrics = true,
   onSkip,
 }: {
   song: QueueItem | null;
   isHost?: boolean;
+  showLyrics?: boolean;
   onSkip?: () => void;
 }) {
   if (!song) {
@@ -48,19 +50,21 @@ export function NowPlaying({
         {song.startedAt ? ` · started ${timeAgo(song.startedAt)}` : ""}
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
-        <Button
-          variant="outline"
-          className="h-12 max-w-full flex-1 truncate"
-          render={
-            <a
-              href={lyricsSearchUrl(song.title, song.language)}
-              target="_blank"
-              rel="noreferrer"
-            />
-          }
-        >
-          {lyricsSearchButtonLabel(song.title, song.language)}
-        </Button>
+        {showLyrics ? (
+          <Button
+            variant="outline"
+            className="h-12 max-w-full flex-1 truncate"
+            render={
+              <a
+                href={lyricsSearchUrl(song.title, song.language)}
+                target="_blank"
+                rel="noreferrer"
+              />
+            }
+          >
+            {LYRICS_BUTTON_LABEL}
+          </Button>
+        ) : null}
         {song.url ? (
           <Button
             variant="outline"

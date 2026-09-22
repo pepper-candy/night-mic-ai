@@ -28,8 +28,10 @@ export interface EventInfo {
   title: string;
   description: string;
   location: string;
-  /** Unix ms when the event starts. */
+  /** Unix ms when the event starts (absolute instant). */
   startsAt: number;
+  /** IANA timezone the host chose for display. Defaults to Asia/Hong_Kong. */
+  timezone?: string;
 }
 
 export interface Room {

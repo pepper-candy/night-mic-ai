@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { searchSongs, submitSong } from "@/lib/api-client";
-import { getDisplayName, getGuestId } from "@/lib/identity";
+import { getGuestId, getRoomNickname } from "@/lib/identity";
 import type { PublicRoom, SongLanguage, SongSearchHit } from "@/lib/types";
 import { SearchIcon, XIcon } from "lucide-react";
 
@@ -19,9 +19,12 @@ const LANGUAGE_OPTIONS: Array<{ value: SongLanguage; label: string }> = [
 export function AddSongForm({
   code,
   onAdded,
+  asName,
 }: {
   code: string;
   onAdded: (room: PublicRoom) => void;
+  /** Host/cohost songs can skip the guest nickname. */
+  asName?: string;
 }) {
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState("");
@@ -93,6 +96,11 @@ export function AddSongForm({
       toast.error("Pick a song language category.");
       return;
     }
+    const displayName = (asName ?? getRoomNickname(code)).trim();
+    if (!displayName) {
+      toast.error("Pick a nickname before adding a song.");
+      return;
+    }
     setPending(true);
     try {
       const room = await submitSong(code, {
@@ -102,7 +110,7 @@ export function AddSongForm({
         spotifyUrl,
         language,
         languageOther: language === "other" ? languageOther : undefined,
-        displayName: getDisplayName() || "Mystery singer",
+        displayName,
         guestId: getGuestId(),
       });
       onAdded(room);

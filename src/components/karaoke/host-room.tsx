@@ -13,7 +13,7 @@ import { SongRow } from "@/components/karaoke/song-row";
 import { EmptyQueue, ErrorState, LoadingState, LockedHost } from "@/components/karaoke/states";
 import { ValidationSettingsPanel } from "@/components/karaoke/validation-settings-panel";
 import { Button } from "@/components/ui/button";
-import { saveDisplayName, saveHostToken, useHasHydrated, useHostToken } from "@/hooks/use-identity";
+import { saveHostToken, useHasHydrated, useHostToken } from "@/hooks/use-identity";
 import { useRoom } from "@/hooks/use-room";
 import { queueAction, songAction } from "@/lib/api-client";
 import type { PublicRoom, QueueItem } from "@/lib/types";
@@ -37,9 +37,6 @@ export function HostRoom({
   useEffect(() => {
     if (hostTokenFromUrl) {
       saveHostToken(code, hostTokenFromUrl);
-    }
-    if (hostTokenFromUrl || storedToken) {
-      saveDisplayName("Host");
     }
   }, [code, hostTokenFromUrl, storedToken]);
 
@@ -140,6 +137,7 @@ export function HostRoom({
         <NowPlaying
           song={room.nowPlaying}
           isHost
+          showLyrics={false}
           onSkip={() => void run(() => queueAction(code, "skip"), "Next singer, you're up.")}
         />
       </div>
@@ -197,7 +195,7 @@ export function HostRoom({
 
       <div className="mt-4">
         {showAdd ? (
-          <AddSongForm code={code} onAdded={apply} />
+          <AddSongForm code={code} onAdded={apply} asName="Host" />
         ) : (
           <Button variant="outline" className="h-12 w-full" onClick={() => setShowAdd(true)}>
             Add a song as host

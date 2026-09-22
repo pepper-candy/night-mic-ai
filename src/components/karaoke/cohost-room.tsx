@@ -12,7 +12,6 @@ import { EmptyQueue, ErrorState, LoadingState } from "@/components/karaoke/state
 import { Button } from "@/components/ui/button";
 import {
   saveCohostToken,
-  saveDisplayName,
   useCohostToken,
   useHasHydrated,
   useHostToken,
@@ -41,9 +40,6 @@ export function CohostRoom({
   useEffect(() => {
     if (cohostTokenFromUrl) {
       saveCohostToken(code, cohostTokenFromUrl);
-    }
-    if (cohostTokenFromUrl || storedCohost) {
-      saveDisplayName("Cohost");
     }
   }, [code, cohostTokenFromUrl, storedCohost]);
 
@@ -149,7 +145,7 @@ export function CohostRoom({
         </p>
       </section>
 
-      <NowPlaying song={room.nowPlaying} />
+      <NowPlaying song={room.nowPlaying} showLyrics={false} />
 
       {previewSong ? (
         <section className="mt-4 space-y-2">

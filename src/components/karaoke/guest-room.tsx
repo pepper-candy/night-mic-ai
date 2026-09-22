@@ -9,7 +9,13 @@ import { NowPlaying } from "@/components/karaoke/now-playing";
 import { SongRow } from "@/components/karaoke/song-row";
 import { EmptyQueue, ErrorState, LoadingState } from "@/components/karaoke/states";
 import { Button } from "@/components/ui/button";
-import { useDisplayName, useGuestId, useHasHydrated, useHostToken } from "@/hooks/use-identity";
+import {
+  useCohostToken,
+  useGuestId,
+  useHasHydrated,
+  useHostToken,
+  useRoomNickname,
+} from "@/hooks/use-identity";
 import { useRoom } from "@/hooks/use-room";
 import { songAction } from "@/lib/api-client";
 import { formatCode } from "@/lib/codes";
@@ -17,9 +23,13 @@ import { formatCode } from "@/lib/codes";
 export function GuestRoom({ code }: { code: string }) {
   const { room, error, loading, apply, refresh } = useRoom(code);
   const guestId = useGuestId();
-  const name = useDisplayName();
-  const isHost = Boolean(useHostToken(code));
+  const nickname = useRoomNickname(code);
+  const hostToken = useHostToken(code);
+  const cohostToken = useCohostToken(code);
+  const isHost = Boolean(hostToken);
+  const isStaff = Boolean(isHost || cohostToken);
   const hydrated = useHasHydrated();
+  const name = nickname || (isHost ? "Host" : isStaff ? "Cohost" : "");
 
   if (loading && !room) {
     return (
@@ -56,7 +66,7 @@ export function GuestRoom({ code }: { code: string }) {
     );
   }
 
-  if (!name) {
+  if (!nickname && !isStaff) {
     return (
       <AppShell>
         <BrandMark />
@@ -97,7 +107,11 @@ export function GuestRoom({ code }: { code: string }) {
       <NowPlaying song={room.nowPlaying} />
 
       <div className="mt-4">
-        <AddSongForm code={code} onAdded={apply} />
+        <AddSongForm
+          code={code}
+          onAdded={apply}
+          asName={!nickname && isStaff ? (isHost ? "Host" : "Cohost") : undefined}
+        />
       </div>
 
       <section className="mt-6 space-y-3">
