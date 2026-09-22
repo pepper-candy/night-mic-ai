@@ -2,6 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { LinkPreview } from "@/components/karaoke/link-preview";
 import { VerifiedBadge } from "@/components/karaoke/verified-badge";
 import { languageLabel, LYRICS_BUTTON_LABEL, lyricsSearchUrl } from "@/lib/media";
 import { timeAgo } from "@/lib/time";
@@ -12,11 +13,14 @@ export function NowPlaying({
   song,
   isHost,
   showLyrics = true,
+  showEmbed = false,
   onSkip,
 }: {
   song: QueueItem | null;
   isHost?: boolean;
   showLyrics?: boolean;
+  /** Embed YouTube/Spotify like the cohost preview, for the song that is on. */
+  showEmbed?: boolean;
   onSkip?: () => void;
 }) {
   if (!song) {
@@ -97,6 +101,11 @@ export function NowPlaying({
           </Button>
         ) : null}
       </div>
+      {showEmbed && (youtubeHref || spotifyHref) ? (
+        <div className="mt-4">
+          <LinkPreview url={song.url} spotifyUrl={song.spotifyUrl} />
+        </div>
+      ) : null}
     </section>
   );
 }
