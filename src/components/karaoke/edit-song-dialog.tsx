@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { songAction } from "@/lib/api-client";
-import type { PublicRoom, QueueItem, SongLanguage } from "@/lib/types";
+import { MAX_URL, type PublicRoom, type QueueItem, type SongLanguage } from "@/lib/types";
 
 function EditSongForm({
   code,
@@ -117,7 +117,7 @@ function EditSongForm({
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           className="h-11"
-          maxLength={300}
+          maxLength={MAX_URL}
         />
       </div>
       <div className="space-y-1.5">
@@ -128,7 +128,7 @@ function EditSongForm({
           value={spotifyUrl}
           onChange={(e) => setSpotifyUrl(e.target.value)}
           className="h-11"
-          maxLength={300}
+          maxLength={MAX_URL}
         />
       </div>
       <Button type="submit" disabled={pending} className="h-12 w-full neon-button">

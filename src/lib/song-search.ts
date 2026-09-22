@@ -1,9 +1,20 @@
-import type { SongSearchHit } from "@/lib/types";
+import {
+  spotifyCatalogSearchUrl,
+  youtubeKaraokeSearchUrl,
+} from "@/lib/media";
+import {
+  MAX_URL,
+  type SongLanguage,
+  type SongSearchHit,
+} from "@/lib/types";
 
 /** Strip movie/OST/feat clutter so karaoke titles stay readable. */
 export function cleanSongTitle(raw: string): string {
   let title = raw.trim();
-  title = title.replace(/\s*[\(\[\{][^)\]\}]*\b(from|soundtrack|ost|theme|movie|film|feat\.?|ft\.?|with)\b[^)\]\}]*[\)\]\}]/gi, "");
+  title = title.replace(
+    /\s*[\(\[\{][^)\]\}]*\b(from|soundtrack|ost|theme|movie|film|feat\.?|ft\.?|with)\b[^)\]\}]*[\)\]\}]/gi,
+    "",
+  );
   title = title.replace(/\s*-\s*(from|theme|soundtrack|ost)\b.*$/i, "");
   title = title.replace(/\s{2,}/g, " ").trim();
   title = title.replace(/[\s\-–—:]+$/g, "").trim();
@@ -14,7 +25,6 @@ interface ItunesResult {
   trackId?: number;
   trackName?: string;
   artistName?: string;
-  collectionName?: string;
 }
 
 interface ItunesResponse {
@@ -23,7 +33,6 @@ interface ItunesResponse {
 
 interface SpotifyTokenResponse {
   access_token?: string;
-  token_type?: string;
   expires_in?: number;
 }
 
@@ -41,11 +50,46 @@ interface SpotifySearchResponse {
 interface YoutubeSearchResponse {
   items?: Array<{
     id?: { videoId?: string };
-    snippet?: { title?: string; channelTitle?: string };
   }>;
 }
 
 let spotifyCache: { token: string; expiresAt: number } | null = null;
+
+function hasHangul(text: string): boolean {
+  return /[\uAC00-\uD7AF]/.test(text);
+}
+
+function hasKana(text: string): boolean {
+  return /[\u3040-\u30FF]/.test(text);
+}
+
+function hasCjk(text: string): boolean {
+  return /[\u4E00-\u9FFF]/.test(text);
+}
+
+function hasLatin(text: string): boolean {
+  return /[A-Za-z]/.test(text);
+}
+
+/** Best-effort language from script + iTunes storefront. Guest can still change it. */
+export function guessSongLanguage(
+  title: string,
+  artist: string,
+  country?: string,
+): { language: SongLanguage; languageOther?: string } | undefined {
+  const text = `${title} ${artist}`;
+  if (hasHangul(text)) return { language: "other", languageOther: "Korean" };
+  if (hasKana(text)) return { language: "other", languageOther: "Japanese" };
+  if (hasCjk(text)) {
+    const store = (country || "").toUpperCase();
+    if (store === "CN" || store === "TW") {
+      return { language: "other", languageOther: "Mandarin" };
+    }
+    return { language: "cantonese" };
+  }
+  if (hasLatin(text)) return { language: "english" };
+  return undefined;
+}
 
 async function getSpotifyToken(): Promise<string | null> {
   const clientId = process.env.SPOTIFY_CLIENT_ID?.trim();
@@ -76,12 +120,17 @@ async function getSpotifyToken(): Promise<string | null> {
   return data.access_token;
 }
 
-async function searchItunes(query: string, limit: number): Promise<SongSearchHit[]> {
+async function searchItunesCountry(
+  query: string,
+  country: string,
+  limit: number,
+): Promise<SongSearchHit[]> {
   const url = new URL("https://itunes.apple.com/search");
   url.searchParams.set("term", query);
   url.searchParams.set("media", "music");
   url.searchParams.set("entity", "song");
   url.searchParams.set("limit", String(limit));
+  url.searchParams.set("country", country);
 
   const res = await fetch(url.toString(), { cache: "no-store" });
   if (!res.ok) return [];
@@ -96,14 +145,26 @@ async function searchItunes(query: string, limit: number): Promise<SongSearchHit
     const key = `${title.toLowerCase()}::${artist.toLowerCase()}`;
     if (seen.has(key)) continue;
     seen.add(key);
+    const guessed = guessSongLanguage(title, artist, country);
     hits.push({
-      id: `itunes-${item.trackId ?? hits.length}`,
+      id: `itunes-${country}-${item.trackId ?? hits.length}`,
       title: title.slice(0, 80),
       artist: artist.slice(0, 80),
-      source: "Apple Music",
+      source: country === "HK" ? "Apple Music (HK)" : "Apple Music",
+      ...guessed,
     });
   }
   return hits;
+}
+
+async function searchItunes(query: string, limit: number): Promise<SongSearchHit[]> {
+  // HK storefront helps Cantonese / local titles; US covers international.
+  const [hk, us] = await Promise.all([
+    searchItunesCountry(query, "HK", limit),
+    searchItunesCountry(query, "US", limit),
+  ]);
+  const cjkQuery = hasCjk(query) || hasHangul(query) || hasKana(query);
+  return cjkQuery ? mergeHits(hk, us) : mergeHits(us, hk);
 }
 
 async function searchSpotify(query: string, limit: number): Promise<SongSearchHit[]> {
@@ -124,26 +185,26 @@ async function searchSpotify(query: string, limit: number): Promise<SongSearchHi
   const hits: SongSearchHit[] = [];
   for (const [index, track] of (data.tracks?.items ?? []).entries()) {
     const title = cleanSongTitle(track.name || "");
-    const artist = (track.artists ?? [])
-      .map((a) => a.name)
-      .filter(Boolean)
-      .join(", ");
+    const artists: string[] = [];
+    for (const a of track.artists ?? []) {
+      if (a.name) artists.push(a.name);
+    }
+    const artist = artists.join(", ");
     if (!title || !artist) continue;
+    const guessed = guessSongLanguage(title, artist);
     hits.push({
       id: `spotify-${track.id || index}`,
       title: title.slice(0, 80),
       artist: artist.slice(0, 80),
       spotifyUrl: track.external_urls?.spotify,
       source: "Spotify",
+      ...guessed,
     });
   }
   return hits;
 }
 
-async function searchYoutube(
-  title: string,
-  artist: string,
-): Promise<string | undefined> {
+async function searchYoutube(title: string, artist: string): Promise<string | undefined> {
   const apiKey = process.env.YOUTUBE_API_KEY?.trim();
   if (!apiKey) return undefined;
 
@@ -174,6 +235,8 @@ function mergeHits(primary: SongSearchHit[], secondary: SongSearchHit[]): SongSe
       if (existing) {
         existing.spotifyUrl = existing.spotifyUrl || hit.spotifyUrl;
         existing.url = existing.url || hit.url;
+        existing.language = existing.language || hit.language;
+        existing.languageOther = existing.languageOther || hit.languageOther;
       }
       continue;
     }
@@ -183,11 +246,32 @@ function mergeHits(primary: SongSearchHit[], secondary: SongSearchHit[]): SongSe
   return out;
 }
 
+function fitUrl(url: string): string | undefined {
+  return url.length <= MAX_URL ? url : undefined;
+}
+
+function withFindLinks(hit: SongSearchHit): SongSearchHit {
+  const youtube =
+    hit.url ||
+    youtubeKaraokeSearchUrl(hit.title, hit.artist) ||
+    youtubeKaraokeSearchUrl(hit.title);
+  const spotify =
+    hit.spotifyUrl ||
+    spotifyCatalogSearchUrl(hit.title, hit.artist) ||
+    spotifyCatalogSearchUrl(hit.title);
+  return {
+    ...hit,
+    url: fitUrl(youtube) || fitUrl(youtubeKaraokeSearchUrl(hit.title)),
+    spotifyUrl: fitUrl(spotify) || fitUrl(spotifyCatalogSearchUrl(hit.title)),
+  };
+}
+
 /**
  * Search songs for autocomplete / autofill.
- * Always uses Apple's free iTunes Search API for title + artist.
- * Optional: SPOTIFY_CLIENT_ID/SECRET for Spotify track links,
- * YOUTUBE_API_KEY for a YouTube karaoke link on the top hit.
+ * Apple iTunes (US + HK) always runs — no key.
+ * Every hit gets author, a language guess when possible, and YouTube / Spotify
+ * search-page links so guests can tap through without API keys.
+ * Optional YOUTUBE_API_KEY / Spotify client keys upgrade those to exact URLs.
  */
 export async function searchSongs(query: string, limit = 8): Promise<SongSearchHit[]> {
   const q = query.trim();
@@ -198,7 +282,7 @@ export async function searchSongs(query: string, limit = 8): Promise<SongSearchH
     searchSpotify(q, limit),
   ]);
 
-  let hits = mergeHits(itunes, spotify).slice(0, limit);
+  let hits = mergeHits(itunes, spotify).slice(0, limit).map(withFindLinks);
 
   if (hits[0] && process.env.YOUTUBE_API_KEY?.trim()) {
     const youtubeUrl = await searchYoutube(hits[0].title, hits[0].artist);

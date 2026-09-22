@@ -2,7 +2,13 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { languageLabel, LYRICS_BUTTON_LABEL, lyricsSearchUrl } from "@/lib/media";
+import {
+  languageLabel,
+  LYRICS_BUTTON_LABEL,
+  lyricsSearchUrl,
+  spotifyCatalogSearchUrl,
+  youtubeKaraokeSearchUrl,
+} from "@/lib/media";
 import { timeAgo } from "@/lib/time";
 import type { QueueItem } from "@/lib/types";
 import { ExternalLinkIcon, SkipForwardIcon } from "lucide-react";
@@ -31,6 +37,8 @@ export function NowPlaying({
   }
 
   const lang = languageLabel(song.language || "english", song.languageOther);
+  const youtubeHref = song.url || youtubeKaraokeSearchUrl(song.title, song.artist);
+  const spotifyHref = song.spotifyUrl || spotifyCatalogSearchUrl(song.title, song.artist);
 
   return (
     <section className="now-playing px-5 py-6">
@@ -65,21 +73,21 @@ export function NowPlaying({
             {LYRICS_BUTTON_LABEL}
           </Button>
         ) : null}
-        {song.url ? (
+        {youtubeHref ? (
           <Button
             variant="outline"
             className="h-12 flex-1"
-            render={<a href={song.url} target="_blank" rel="noreferrer" />}
+            render={<a href={youtubeHref} target="_blank" rel="noreferrer" />}
           >
             <ExternalLinkIcon data-icon="inline-start" />
-            Open track
+            YouTube / karaoke
           </Button>
         ) : null}
-        {song.spotifyUrl ? (
+        {spotifyHref ? (
           <Button
             variant="outline"
             className="h-12 flex-1"
-            render={<a href={song.spotifyUrl} target="_blank" rel="noreferrer" />}
+            render={<a href={spotifyHref} target="_blank" rel="noreferrer" />}
           >
             <ExternalLinkIcon data-icon="inline-start" />
             Spotify

@@ -13,7 +13,7 @@ Built with Next.js (App Router), TypeScript, and Tailwind. Designed for phones f
 1. **Host** taps **Host this night**. Night Mic mints a shoutable code like `VIBE 42` and a host session on that device.
 2. Guests open the share link (`/room/VIBE42`) or type the code on the home page / `/join`.
 3. Each guest picks a display name and submits a song: **title + artist + language category required**, optional YouTube/karaoke and Spotify URLs. Language is **Cantonese**, **English**, or **Other** (with a short note) so the night stays mixed.
-4. Guests can **search as they type** in the title field (magnifier runs a full search). Matches autofill a clean title + artist, and streaming links when API keys are configured.
+4. Guests can **search as they type** in the title field (magnifier runs a full search). Picking a match autofills a clean title, **artist**, a **language guess** when possible (Cantonese / English / Korean / Japanese / Mandarin), and **YouTube karaoke + Spotify search-page links** so people can tap and find the song — no API keys required.
 5. Hosts can publish an **invitation** (`/invite/CODE`) with title, brief description, location, and start time — guests see a live countdown before joining the queue.
 6. Optional **link validation**: host turns it on and shares a **cohost link**. That second device embeds YouTube/Spotify previews, and host/cohost can edit any queued song (cards show `(modified)` after the requester’s name).
 7. Everyone in the room sees the same live queue. The host can:
@@ -50,12 +50,12 @@ Copy `.env.example` to `.env.local` if you want Redis locally.
 | `UPSTASH_REDIS_REST_TOKEN` | On Vercel | Upstash Redis REST token |
 | `KV_REST_API_URL` | Alternative | Vercel KV REST URL (same protocol) |
 | `KV_REST_API_TOKEN` | Alternative | Vercel KV REST token |
-| `YOUTUBE_API_KEY` | Optional | YouTube Data API v3 — autofill a karaoke YouTube link on the top search hit |
-| `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` | Optional | Spotify Client Credentials — autofill Spotify track links in search |
+| `YOUTUBE_API_KEY` | Optional | YouTube Data API v3 — upgrade the top hit from a karaoke search page to an exact watch URL |
+| `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` | Optional | Spotify Client Credentials — upgrade search-page links to exact track URLs |
 
 Either the Upstash pair **or** the Vercel KV pair is enough. If both are set, Upstash wins.
 
-Song search **always** works for title + artist via Apple’s free iTunes Search API (no key). YouTube/Spotify link autofill needs the optional keys above.
+Song search **always** works without keys: Apple’s free iTunes Search API (US + HK) fills title + artist, a language guess when the script/storefront is clear, and YouTube / Spotify **search pages** (`youtube.com/results`, `open.spotify.com/search`) so anyone can tap through. The optional keys above only swap those for exact video/track links (useful for embeds).
 
 **Persistence modes**
 
@@ -91,7 +91,7 @@ Origin and Vercel both speak git. Origin holds the source of truth for this work
 - Near-real-time sync via 1.5s polling (works on Vercel serverless; no long-lived socket server)
 - `@upstash/redis` when credentials are present
 
-Song entry is free text with optional catalog search (iTunes, plus Spotify/YouTube when keys are set).
+Song entry is free text with optional catalog search (iTunes always; YouTube/Spotify search pages always; exact streaming IDs when optional keys are set).
 
 ## Hardening later (not in this MVP)
 

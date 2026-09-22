@@ -2,7 +2,13 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { languageLabel, LYRICS_BUTTON_LABEL, lyricsSearchUrl } from "@/lib/media";
+import {
+  languageLabel,
+  LYRICS_BUTTON_LABEL,
+  lyricsSearchUrl,
+  spotifyCatalogSearchUrl,
+  youtubeKaraokeSearchUrl,
+} from "@/lib/media";
 import { timeAgo } from "@/lib/time";
 import type { QueueItem } from "@/lib/types";
 import {
@@ -53,6 +59,8 @@ export function SongRow({
   const showHostQueueActions = Boolean(isHost && song.status === "queued" && (onPlay || onMove));
   const showGuestCancel = Boolean(!staff && isOwn && song.status === "queued" && onCancel);
   const lang = languageLabel(song.language || "english", song.languageOther);
+  const youtubeHref = song.url || youtubeKaraokeSearchUrl(song.title, song.artist);
+  const spotifyHref = song.spotifyUrl || spotifyCatalogSearchUrl(song.title, song.artist);
 
   return (
     <article className="glow-panel p-3.5">
@@ -95,9 +103,9 @@ export function SongRow({
                     {LYRICS_BUTTON_LABEL}
                   </a>
                 ) : null}
-                {song.url ? (
+                {youtubeHref ? (
                   <a
-                    href={song.url}
+                    href={youtubeHref}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex items-center gap-1 text-sm text-cyan underline-offset-4 hover:underline"
@@ -106,9 +114,9 @@ export function SongRow({
                     <ExternalLinkIcon className="size-3.5" />
                   </a>
                 ) : null}
-                {song.spotifyUrl ? (
+                {spotifyHref ? (
                   <a
-                    href={song.spotifyUrl}
+                    href={spotifyHref}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex items-center gap-1 text-sm text-cyan underline-offset-4 hover:underline"

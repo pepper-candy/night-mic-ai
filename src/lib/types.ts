@@ -78,6 +78,8 @@ export interface SongSearchHit {
   artist: string;
   url?: string;
   spotifyUrl?: string;
+  language?: SongLanguage;
+  languageOther?: string;
   source: string;
 }
 
@@ -91,7 +93,8 @@ export const MAX_SONGS_PER_GUEST = 12;
 export const MAX_TITLE = 80;
 export const MAX_ARTIST = 80;
 export const MAX_NAME = 24;
-export const MAX_URL = 300;
+/** Encoded YouTube/Spotify search URLs for long CJK titles need more than 300. */
+export const MAX_URL = 2000;
 export const MAX_EVENT_TITLE = 80;
 export const MAX_EVENT_DESCRIPTION = 400;
 export const MAX_EVENT_LOCATION = 120;
