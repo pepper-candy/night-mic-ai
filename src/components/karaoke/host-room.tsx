@@ -8,6 +8,7 @@ import { AppShell, BrandMark } from "@/components/karaoke/app-shell";
 import { EditSongDialog } from "@/components/karaoke/edit-song-dialog";
 import { EventSettingsPanel } from "@/components/karaoke/event-settings-panel";
 import { NowPlaying } from "@/components/karaoke/now-playing";
+import { QueueGatePanel } from "@/components/karaoke/queue-gate-panel";
 import { SharePanel } from "@/components/karaoke/share-panel";
 import { SongRow } from "@/components/karaoke/song-row";
 import { EmptyQueue, ErrorState, LoadingState, LockedHost } from "@/components/karaoke/states";
@@ -30,7 +31,6 @@ export function HostRoom({
   const hydrated = useHasHydrated();
   const hostToken = hostTokenFromUrl || storedToken || undefined;
   const authorized = Boolean(hostToken);
-  const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<QueueItem | null>(null);
   const [cohostToken, setCohostToken] = useState<string | undefined>();
 
@@ -131,6 +131,12 @@ export function HostRoom({
             if (token) setCohostToken(token);
           }}
         />
+        <QueueGatePanel
+          key={`${room.queueOpen}-${room.queueOpensAt ?? "none"}`}
+          code={code}
+          room={room}
+          onUpdated={apply}
+        />
       </div>
 
       <div className="mt-4">
@@ -163,9 +169,6 @@ export function HostRoom({
               >
                 Add 3 classics
               </Button>
-              <Button variant="outline" className="h-12 flex-1" onClick={() => setShowAdd(true)}>
-                Add a song
-              </Button>
             </div>
           </EmptyQueue>
         ) : room.upNext.length === 0 ? (
@@ -195,13 +198,7 @@ export function HostRoom({
       </section>
 
       <div className="mt-4">
-        {showAdd ? (
-          <AddSongForm code={code} onAdded={apply} asName="Host" />
-        ) : (
-          <Button variant="outline" className="h-12 w-full" onClick={() => setShowAdd(true)}>
-            Add a song as host
-          </Button>
-        )}
+        <AddSongForm code={code} onAdded={apply} asName="Host" />
       </div>
 
       {room.done.length > 0 ? (

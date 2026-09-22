@@ -59,11 +59,15 @@ export function JoinForm({
       {!compact ? (
         <div>
           <p className="font-display text-3xl tracking-wide">Jump in</p>
-          <p className="text-sm text-muted-foreground">
-            {initialCode
-              ? `You're heading to ${formatCode(normalizeCode(initialCode))}. Pick a nickname for this room.`
-              : "Type the room code and a nickname people will see on the queue."}
-          </p>
+          {initialCode ? (
+            <p className="text-sm text-muted-foreground">
+              You&apos;re heading to {formatCode(normalizeCode(initialCode))}.
+            </p>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Type the room code and a nickname people will see on the queue.
+            </p>
+          )}
         </div>
       ) : null}
       {!initialCode ? (
@@ -95,16 +99,6 @@ export function JoinForm({
           readOnly={isLocked}
           aria-readonly={isLocked}
         />
-        {isLocked ? (
-          <p className="text-xs text-muted-foreground">
-            Locked for this room on this device. Incognito or another browser can still pick a
-            different name.
-          </p>
-        ) : (
-          <p className="text-xs text-muted-foreground">
-            Required. This nickname stays on this device for this room.
-          </p>
-        )}
       </div>
       <Button type="submit" disabled={pending} className="h-12 w-full text-base neon-button">
         {pending ? "Finding the room…" : "Join the queue"}

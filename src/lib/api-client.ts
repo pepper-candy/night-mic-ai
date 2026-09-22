@@ -46,8 +46,9 @@ export async function submitSong(
     artist: string;
     url?: string;
     spotifyUrl?: string;
-    language: string;
+    language?: string;
     languageOther?: string;
+    message?: string;
     displayName: string;
     guestId: string;
   },
@@ -55,7 +56,7 @@ export async function submitSong(
   return parse<PublicRoom>(
     await fetch(`/api/rooms/${code}/songs`, {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: staffHeaders(code),
       body: JSON.stringify(input),
     }),
   );
@@ -110,6 +111,19 @@ export async function updateEvent(
 ): Promise<PublicRoom> {
   return parse<PublicRoom>(
     await fetch(`/api/rooms/${code}/event`, {
+      method: "PATCH",
+      headers: hostHeaders(code),
+      body: JSON.stringify(input),
+    }),
+  );
+}
+
+export async function setQueueGate(
+  code: string,
+  input: { open: boolean; opensAt?: string | number; timezone?: string },
+): Promise<PublicRoom> {
+  return parse<PublicRoom>(
+    await fetch(`/api/rooms/${code}/queue-gate`, {
       method: "PATCH",
       headers: hostHeaders(code),
       body: JSON.stringify(input),

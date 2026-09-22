@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { DescriptionNote } from "@/components/karaoke/description-note";
 import { eventTimezoneLabel, formatEventWhen } from "@/lib/event-time";
 import { countdownParts } from "@/lib/time";
+import type { EventInfo } from "@/lib/types";
+import { MapPinIcon } from "lucide-react";
 
 function Pad({ value }: { value: number }) {
   return <span className="tabular-nums">{String(value).padStart(2, "0")}</span>;
@@ -26,7 +29,7 @@ export function EventCountdown({
   const zoneNote = (
     <p className="mt-3 text-sm text-muted-foreground">
       {formatEventWhen(startsAt, timezone)}
-      <span className="mt-1 block text-[10px] uppercase tracking-[0.18em]">
+      <span className="mt-1 block text-xs">
         {eventTimezoneLabel(timezone)}
       </span>
     </p>
@@ -64,6 +67,31 @@ export function EventCountdown({
         ))}
       </div>
       {zoneNote}
+    </div>
+  );
+}
+
+/** Live countdown + details for guests who joined before the event starts. */
+export function UpcomingEventBanner({ event }: { event: EventInfo }) {
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  if (now >= event.startsAt) return null;
+
+  return (
+    <div className="mb-4 space-y-3">
+      <EventCountdown startsAt={event.startsAt} timezone={event.timezone} />
+      {event.description ? <DescriptionNote text={event.description} /> : null}
+      {event.location ? (
+        <p className="flex items-start gap-2 px-1 text-sm text-muted-foreground">
+          <MapPinIcon className="mt-0.5 size-4 shrink-0 text-cyan" />
+          <span>{event.location}</span>
+        </p>
+      ) : null}
     </div>
   );
 }

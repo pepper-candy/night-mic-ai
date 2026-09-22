@@ -33,8 +33,9 @@ export function addSongToRoom(
     artist: string;
     url?: string;
     spotifyUrl?: string;
-    language: SongLanguage;
+    language?: SongLanguage;
     languageOther?: string;
+    message?: string;
     submittedBy: string;
     submitterId: string;
   },
@@ -56,6 +57,7 @@ export function addSongToRoom(
     spotifyUrl: input.spotifyUrl,
     language: input.language,
     languageOther: input.languageOther,
+    message: input.message,
     submittedBy: input.submittedBy,
     submitterId: input.submitterId,
     status: "queued",
@@ -161,8 +163,9 @@ export function editSongInRoom(
     artist: string;
     url?: string;
     spotifyUrl?: string;
-    language: SongLanguage;
+    language?: SongLanguage;
     languageOther?: string;
+    message?: string;
   },
 ): Room {
   const exists = room.queue.some((item) => item.id === id);
@@ -180,6 +183,7 @@ export function editSongInRoom(
         spotifyUrl: patch.spotifyUrl,
         language: patch.language,
         languageOther: patch.language === "other" ? patch.languageOther : undefined,
+        message: patch.message,
         modified: true,
       };
     }),
@@ -241,6 +245,17 @@ export function setRoomEvent(room: Room, event: EventInfo | undefined): Room {
   return bump({
     ...room,
     event,
+  });
+}
+
+export function setQueueGate(
+  room: Room,
+  gate: { open: boolean; opensAt?: number },
+): Room {
+  return bump({
+    ...room,
+    queueOpen: gate.open,
+    queueOpensAt: gate.open ? undefined : gate.opensAt,
   });
 }
 

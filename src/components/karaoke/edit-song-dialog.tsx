@@ -13,7 +13,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { songAction } from "@/lib/api-client";
-import { MAX_URL, type PublicRoom, type QueueItem, type SongLanguage } from "@/lib/types";
+import { assignMediaLink, combinedMediaLink } from "@/lib/media";
+import { MAX_MESSAGE, MAX_URL, type PublicRoom, type QueueItem, type SongLanguage } from "@/lib/types";
 
 function EditSongForm({
   code,
@@ -28,10 +29,10 @@ function EditSongForm({
 }) {
   const [title, setTitle] = useState(song.title);
   const [artist, setArtist] = useState(song.artist);
-  const [url, setUrl] = useState(song.url ?? "");
-  const [spotifyUrl, setSpotifyUrl] = useState(song.spotifyUrl ?? "");
-  const [language, setLanguage] = useState<SongLanguage>(song.language || "english");
+  const [link, setLink] = useState(combinedMediaLink(song.url, song.spotifyUrl));
+  const [language, setLanguage] = useState<SongLanguage | "">(song.language || "");
   const [languageOther, setLanguageOther] = useState(song.languageOther ?? "");
+  const [message, setMessage] = useState(song.message ?? "");
   const [pending, setPending] = useState(false);
 
   return (
@@ -42,13 +43,15 @@ function EditSongForm({
         void (async () => {
           setPending(true);
           try {
+            const media = assignMediaLink(link);
             const room = await songAction(code, song.id, "edit", {
               title,
               artist,
-              url,
-              spotifyUrl,
-              language,
+              url: media.url,
+              spotifyUrl: media.spotifyUrl,
+              language: language || undefined,
               languageOther: language === "other" ? languageOther : undefined,
+              message: message.trim() || undefined,
             });
             onSaved(room);
             onClose();
@@ -80,7 +83,6 @@ function EditSongForm({
           onChange={(e) => setArtist(e.target.value)}
           className="h-11"
           maxLength={80}
-          required
         />
       </div>
       <div className="space-y-1.5">
@@ -88,9 +90,10 @@ function EditSongForm({
         <select
           id="edit-language"
           value={language}
-          onChange={(e) => setLanguage(e.target.value as SongLanguage)}
+          onChange={(e) => setLanguage(e.target.value as SongLanguage | "")}
           className="h-11 w-full rounded-lg border border-input bg-transparent px-2.5 text-base dark:bg-input/30"
         >
+          <option value=""> </option>
           <option value="cantonese">Cantonese</option>
           <option value="english">English</option>
           <option value="other">Other languages</option>
@@ -105,30 +108,29 @@ function EditSongForm({
             onChange={(e) => setLanguageOther(e.target.value)}
             className="h-11"
             maxLength={40}
-            required
           />
         </div>
       ) : null}
       <div className="space-y-1.5">
-        <Label htmlFor="edit-url">YouTube link</Label>
+        <Label htmlFor="edit-link">Link?</Label>
         <Input
-          id="edit-url"
+          id="edit-link"
           type="url"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
+          value={link}
+          onChange={(e) => setLink(e.target.value)}
+          placeholder="https://open.spotify.com/…"
           className="h-11"
           maxLength={MAX_URL}
         />
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="edit-spotify">Spotify link</Label>
-        <Input
-          id="edit-spotify"
-          type="url"
-          value={spotifyUrl}
-          onChange={(e) => setSpotifyUrl(e.target.value)}
-          className="h-11"
-          maxLength={MAX_URL}
+        <Label htmlFor="edit-message">Message to Audience</Label>
+        <textarea
+          id="edit-message"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          className="min-h-20 w-full rounded-lg border border-input bg-transparent px-2.5 py-2 text-base dark:bg-input/30"
+          maxLength={MAX_MESSAGE}
         />
       </div>
       <Button type="submit" disabled={pending} className="h-12 w-full neon-button">

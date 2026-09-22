@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { AppShell, BrandMark } from "@/components/karaoke/app-shell";
+import { DescriptionNote } from "@/components/karaoke/description-note";
 import { EventCountdown } from "@/components/karaoke/event-countdown";
+import { JoinForm } from "@/components/karaoke/join-form";
 import { ErrorState, LoadingState } from "@/components/karaoke/states";
 import { Button } from "@/components/ui/button";
 import { useRoom } from "@/hooks/use-room";
 import { formatCode } from "@/lib/codes";
-import { formatEventWhen } from "@/lib/event-time";
-import { CalendarIcon, MapPinIcon, Mic2Icon } from "lucide-react";
+import { MapPinIcon } from "lucide-react";
 
 export function InvitePage({ code }: { code: string }) {
   const { room, error, loading, refresh } = useRoom(code);
@@ -56,29 +57,13 @@ export function InvitePage({ code }: { code: string }) {
       {event ? (
         <div className="space-y-4">
           <EventCountdown startsAt={event.startsAt} timezone={event.timezone} />
-
-          <section className="glow-panel space-y-3 p-5">
-            {event.description ? (
-              <p className="text-base leading-relaxed text-foreground/90">{event.description}</p>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                The host set a time. Join the room when you&apos;re ready to queue songs.
-              </p>
-            )}
-
-            <div className="space-y-2 pt-1 text-sm">
-              <p className="flex items-start gap-2 text-muted-foreground">
-                <CalendarIcon className="mt-0.5 size-4 shrink-0 text-gold" />
-                <span>{formatEventWhen(event.startsAt, event.timezone)}</span>
-              </p>
-              {event.location ? (
-                <p className="flex items-start gap-2 text-muted-foreground">
-                  <MapPinIcon className="mt-0.5 size-4 shrink-0 text-cyan" />
-                  <span>{event.location}</span>
-                </p>
-              ) : null}
-            </div>
-          </section>
+          {event.description ? <DescriptionNote text={event.description} /> : null}
+          {event.location ? (
+            <p className="flex items-start gap-2 px-1 text-sm text-muted-foreground">
+              <MapPinIcon className="mt-0.5 size-4 shrink-0 text-cyan" />
+              <span>{event.location}</span>
+            </p>
+          ) : null}
         </div>
       ) : (
         <section className="glow-panel space-y-3 p-5">
@@ -89,13 +74,13 @@ export function InvitePage({ code }: { code: string }) {
         </section>
       )}
 
-      <div className="mt-6 grid gap-2">
-        <Button className="h-14 text-base neon-button" render={<Link href={`/room/${code}`} />}>
-          <Mic2Icon data-icon="inline-start" />
-          Join the queue
-        </Button>
-        <Button variant="ghost" className="h-11" render={<Link href="/" />}>
-          Back home
+      <div className="mt-8 glow-panel p-5">
+        <JoinForm initialCode={code} />
+      </div>
+
+      <div className="mt-3 pb-6">
+        <Button variant="ghost" className="h-11 w-full" render={<Link href="/" />}>
+          Home
         </Button>
       </div>
     </AppShell>
