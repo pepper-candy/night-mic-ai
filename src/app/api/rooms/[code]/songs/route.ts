@@ -1,3 +1,4 @@
+import { readStaffToken } from "@/lib/host-token";
 import { addSong, errorResponse } from "@/lib/rooms";
 
 export const dynamic = "force-dynamic";
@@ -9,16 +10,22 @@ export async function POST(
   try {
     const { code } = await context.params;
     const body = (await request.json()) as Record<string, unknown>;
-    const room = await addSong(code, {
-      title: body.title,
-      artist: body.artist,
-      url: body.url,
-      spotifyUrl: body.spotifyUrl,
-      language: body.language,
-      languageOther: body.languageOther,
-      displayName: body.displayName,
-      guestId: body.guestId,
-    });
+    const staffToken = await readStaffToken(code, request);
+    const room = await addSong(
+      code,
+      {
+        title: body.title,
+        artist: body.artist,
+        url: body.url,
+        spotifyUrl: body.spotifyUrl,
+        language: body.language,
+        languageOther: body.languageOther,
+        message: body.message,
+        displayName: body.displayName,
+        guestId: body.guestId,
+      },
+      staffToken,
+    );
     return Response.json(room, { status: 201 });
   } catch (error) {
     return errorResponse(error);

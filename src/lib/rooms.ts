@@ -11,10 +11,12 @@ import {
   removeSong,
   RoomError,
   seedClassics,
+  setQueueGate,
   setRoomEvent,
   setValidationMode,
   skipPlaying,
 } from "@/lib/room-ops";
+import { isQueueAccepting } from "@/lib/queue-gate";
 import { getPersistence, getRoom, saveRoom, updateRoom } from "@/lib/store";
 import type {
   CreateRoomResponse,
@@ -28,6 +30,7 @@ import {
   validateEventInput,
   validateGuestId,
   validateLanguage,
+  validateMessage,
   validateName,
   validateTitle,
   validateUrl,
@@ -147,25 +150,32 @@ export async function addSong(
     spotifyUrl: unknown;
     language: unknown;
     languageOther: unknown;
+    message: unknown;
     displayName: unknown;
     guestId: unknown;
   },
+  staffToken?: string,
 ): Promise<PublicRoom> {
   const code = normalizeCode(rawCode);
   const lang = validateLanguage(input.language, input.languageOther);
   return toPublicRoom(
-    await updateRoom(code, (room) =>
-      addSongToRoom(room, {
+    await updateRoom(code, (room) => {
+      const staff = Boolean(resolveStaffRole(room, staffToken));
+      if (!staff && !isQueueAccepting(room)) {
+        throw new RoomError("The host hasn't opened the queue yet.", 403);
+      }
+      return addSongToRoom(room, {
         title: validateTitle(input.title),
         artist: validateArtist(input.artist),
         url: validateUrl(input.url),
         spotifyUrl: validateUrl(input.spotifyUrl),
         language: lang.language,
         languageOther: lang.languageOther,
+        message: validateMessage(input.message),
         submittedBy: validateName(input.displayName),
         submitterId: validateGuestId(input.guestId),
-      }),
-    ),
+      });
+    }),
     getPersistence(),
   );
 }
@@ -215,6 +225,7 @@ export async function staffEditSong(
     spotifyUrl: unknown;
     language: unknown;
     languageOther: unknown;
+    message: unknown;
   },
 ) {
   const lang = validateLanguage(input.language, input.languageOther);
@@ -226,8 +237,17 @@ export async function staffEditSong(
       spotifyUrl: validateUrl(input.spotifyUrl),
       language: lang.language,
       languageOther: lang.languageOther,
+      message: validateMessage(input.message),
     }),
   );
+}
+
+export async function hostSetQueueGate(
+  code: string,
+  token: string | undefined,
+  input: { open: boolean; opensAt?: number },
+) {
+  return hostMutate(code, token, (room) => setQueueGate(room, input));
 }
 
 export async function hostUpdateEvent(

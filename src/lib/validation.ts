@@ -4,6 +4,7 @@ import {
   MAX_EVENT_LOCATION,
   MAX_EVENT_TITLE,
   MAX_LANGUAGE_OTHER,
+  MAX_MESSAGE,
   MAX_NAME,
   MAX_TITLE,
   MAX_URL,
@@ -36,7 +37,6 @@ export function validateTitle(value: unknown): string {
 
 export function validateArtist(value: unknown): string {
   const artist = trim(value);
-  if (artist.length < 1) throw new Error("Who sings it? Artist is required.");
   if (artist.length > MAX_ARTIST) throw new Error(`Artist names max out at ${MAX_ARTIST} characters.`);
   return artist;
 }
@@ -66,8 +66,9 @@ export function validateGuestId(value: unknown): string {
 export function validateLanguage(
   language: unknown,
   languageOther: unknown,
-): { language: SongLanguage; languageOther?: string } {
+): { language?: SongLanguage; languageOther?: string } {
   const lang = trim(language).toLowerCase();
+  if (!lang) return {};
   if (lang === "cantonese" || lang === "english") {
     return { language: lang };
   }
@@ -80,6 +81,15 @@ export function validateLanguage(
     return { language: "other", languageOther: other };
   }
   throw new Error("Pick Cantonese, English, or Other languages.");
+}
+
+export function validateMessage(value: unknown): string | undefined {
+  const message = trim(value);
+  if (!message) return undefined;
+  if (message.length > MAX_MESSAGE) {
+    throw new Error(`Keep the audience note under ${MAX_MESSAGE} characters.`);
+  }
+  return message;
 }
 
 export function validateEventInput(input: {

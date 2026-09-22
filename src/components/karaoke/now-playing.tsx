@@ -35,7 +35,9 @@ export function NowPlaying({
     );
   }
 
-  const lang = languageLabel(song.language || "english", song.languageOther);
+  const lang = song.language
+    ? languageLabel(song.language, song.languageOther)
+    : undefined;
   const youtubeHref = song.url?.trim() || undefined;
   const spotifyHref = song.spotifyUrl?.trim() || undefined;
 
@@ -45,15 +47,24 @@ export function NowPlaying({
         <p className="text-[11px] uppercase tracking-[0.28em] text-gold">Now singing</p>
         <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
           {song.modified ? <VerifiedBadge /> : null}
-          <Badge variant="secondary" className="bg-gold/20 text-gold">
-            {lang}
-          </Badge>
+          {lang ? (
+            <Badge variant="secondary" className="bg-gold/20 text-gold">
+              {lang}
+            </Badge>
+          ) : null}
         </div>
       </div>
       <h2 className="mt-2 font-display text-4xl leading-none tracking-wide sm:text-5xl">
         {song.title}
       </h2>
-      <p className="mt-2 text-lg text-primary-foreground/85">{song.artist}</p>
+      {song.artist.trim() ? (
+        <p className="mt-2 text-lg text-primary-foreground/85">{song.artist}</p>
+      ) : null}
+      {song.message?.trim() ? (
+        <p className="mt-2 text-base italic text-primary-foreground/80">
+          &ldquo;{song.message.trim()}&rdquo;
+        </p>
+      ) : null}
       <p className="mt-2 text-sm text-muted-foreground">
         {song.submittedBy}
         {song.startedAt ? ` · started ${timeAgo(song.startedAt)}` : ""}

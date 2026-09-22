@@ -10,6 +10,34 @@ export function spotifyCatalogSearchUrl(title: string, artist = ""): string {
   return `https://open.spotify.com/search/${encodeURIComponent(q)}`;
 }
 
+function mediaHost(url: string): string | null {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+}
+
+/** One paste box: YouTube URLs go to `url`, everything else to Spotify. */
+export function assignMediaLink(raw: string): { url?: string; spotifyUrl?: string } {
+  const value = raw.trim();
+  if (!value) return {};
+  const host = mediaHost(value);
+  if (
+    host === "youtube.com" ||
+    host === "m.youtube.com" ||
+    host === "youtu.be" ||
+    host === "music.youtube.com"
+  ) {
+    return { url: value };
+  }
+  return { spotifyUrl: value };
+}
+
+export function combinedMediaLink(url?: string, spotifyUrl?: string): string {
+  return (spotifyUrl || url || "").trim();
+}
+
 export function isYoutubeResultsUrl(url: string | undefined): boolean {
   if (!url) return false;
   try {

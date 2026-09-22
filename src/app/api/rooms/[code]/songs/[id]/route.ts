@@ -34,6 +34,7 @@ export async function PATCH(
           spotifyUrl: body.spotifyUrl,
           language: body.language,
           languageOther: body.languageOther,
+          message: body.message,
         }),
       );
     }

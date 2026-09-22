@@ -8,6 +8,7 @@ import { JoinForm } from "@/components/karaoke/join-form";
 import { NowPlaying } from "@/components/karaoke/now-playing";
 import { SongRow } from "@/components/karaoke/song-row";
 import { EmptyQueue, ErrorState, LoadingState } from "@/components/karaoke/states";
+import { UpcomingEventBanner } from "@/components/karaoke/event-countdown";
 import { Button } from "@/components/ui/button";
 import {
   useCohostToken,
@@ -19,6 +20,7 @@ import {
 import { useRoom } from "@/hooks/use-room";
 import { songAction } from "@/lib/api-client";
 import { formatCode } from "@/lib/codes";
+import { isQueueAccepting, queueClosedMessage } from "@/lib/queue-gate";
 
 export function GuestRoom({ code }: { code: string }) {
   const { room, error, loading, apply, refresh } = useRoom(code);
@@ -104,6 +106,8 @@ export function GuestRoom({ code }: { code: string }) {
         </Button>
       ) : null}
 
+      {room.event ? <UpcomingEventBanner event={room.event} /> : null}
+
       <NowPlaying song={room.nowPlaying} />
 
       <div className="mt-4">
@@ -111,6 +115,8 @@ export function GuestRoom({ code }: { code: string }) {
           code={code}
           onAdded={apply}
           asName={!nickname && isStaff ? (isHost ? "Host" : "Cohost") : undefined}
+          locked={!isStaff && !isQueueAccepting(room)}
+          lockedMessage={queueClosedMessage(room)}
         />
       </div>
 

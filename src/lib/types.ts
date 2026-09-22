@@ -14,6 +14,8 @@ export interface QueueItem {
   spotifyUrl?: string;
   language?: SongLanguage;
   languageOther?: string;
+  /** Note from the singer to the room. */
+  message?: string;
   submittedBy: string;
   submitterId: string;
   status: SongStatus;
@@ -46,6 +48,13 @@ export interface Room {
   event?: EventInfo;
   /** When true, host can invite a cohost device to preview links and edit songs. */
   validationEnabled?: boolean;
+  /**
+   * Guest song intake. Undefined/true = open. False = paused until the host
+   * opens it, or until queueOpensAt if that time has passed.
+   */
+  queueOpen?: boolean;
+  /** If set while the queue is paused, guests can add songs from this instant. */
+  queueOpensAt?: number;
 }
 
 export interface PublicRoom {
@@ -61,6 +70,8 @@ export interface PublicRoom {
   event?: EventInfo;
   validationEnabled: boolean;
   hasCohost: boolean;
+  queueOpen: boolean;
+  queueOpensAt?: number;
 }
 
 export interface CreateRoomResponse {
@@ -99,6 +110,7 @@ export const MAX_EVENT_TITLE = 80;
 export const MAX_EVENT_DESCRIPTION = 400;
 export const MAX_EVENT_LOCATION = 120;
 export const MAX_LANGUAGE_OTHER = 40;
+export const MAX_MESSAGE = 160;
 
 export const SONG_LANGUAGE_LABELS: Record<SongLanguage, string> = {
   cantonese: "Cantonese",

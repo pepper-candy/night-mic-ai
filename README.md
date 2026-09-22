@@ -12,9 +12,9 @@ Built with Next.js (App Router), TypeScript, and Tailwind. Designed for phones f
 
 1. **Host** taps **Host this night**. Night Mic mints a shoutable code like `VIBE 42` and a host session on that device.
 2. Guests open the share link (`/room/VIBE42`) or type the code on the home page / `/join`.
-3. Each guest picks a display name and submits a song: **title + artist + language category required**, optional YouTube/karaoke and Spotify URLs. Language is **Cantonese**, **English**, or **Other** (with a short note) so the night stays mixed.
-4. Guests can **search as they type** in the title field (magnifier runs a full search). Picking a match autofills a clean title, **artist**, a **language guess** when possible (Cantonese / English / Korean / Japanese / Mandarin), and **YouTube karaoke + Spotify search-page links** so people can tap and find the song — no API keys required.
-5. Hosts can publish an **invitation** (`/invite/CODE`) with title, brief description, location, and start time — guests see a live countdown before joining the queue.
+3. Each guest picks a nickname and can add a song with just a **title**. Search suggests matches and fills **artist** (and language when we can tell). **Find song link** opens Spotify search so they can paste a track URL. Language, a message to the audience, and the link live under **More**.
+4. Hosts can **pause** guest song intake or schedule when the queue opens. The add-song panel greys out until then. Hosts can still add songs.
+5. Hosts can publish an **invitation** (`/invite/CODE`) with title, description, location, and start time — guests see a live countdown on the invite and after they join, until the event starts.
 6. Optional **link validation**: host turns it on and shares a **cohost link**. That second device embeds YouTube/Spotify previews, and host/cohost can edit any queued song (cards show a green **Verified** tag next to the language).
 7. Everyone in the room sees the same live queue. The host can:
    - promote a song to **now playing**

@@ -86,14 +86,14 @@ export function zonedLocalToUtcMs(local: string, timeZone: string): number {
 export function formatEventWhen(ms: number, timeZone?: string | null): string {
   const zone = resolveEventTimezone(timeZone);
   try {
-    return new Intl.DateTimeFormat("en-HK", {
+    return new Intl.DateTimeFormat("en-GB", {
       timeZone: zone,
       weekday: "short",
-      month: "short",
       day: "numeric",
+      month: "short",
       hour: "numeric",
       minute: "2-digit",
-      timeZoneName: "short",
+      hour12: true,
     }).format(new Date(ms));
   } catch {
     return new Date(ms).toISOString();

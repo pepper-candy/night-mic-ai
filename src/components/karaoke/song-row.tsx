@@ -53,7 +53,9 @@ export function SongRow({
   const staff = Boolean(isStaff || isHost);
   const showHostQueueActions = Boolean(isHost && song.status === "queued" && (onPlay || onMove));
   const showGuestCancel = Boolean(!staff && isOwn && song.status === "queued" && onCancel);
-  const lang = languageLabel(song.language || "english", song.languageOther);
+  const lang = song.language
+    ? languageLabel(song.language, song.languageOther)
+    : undefined;
   const youtubeHref = song.url?.trim() || undefined;
   const spotifyHref = song.spotifyUrl?.trim() || undefined;
 
@@ -71,16 +73,23 @@ export function SongRow({
               <div className="flex flex-wrap items-center gap-2">
                 <h3 className="truncate text-base font-semibold leading-tight">{song.title}</h3>
                 {song.modified ? <VerifiedBadge /> : null}
-                <Badge variant="secondary" className="bg-gold/15 text-gold">
-                  {lang}
-                </Badge>
+                {lang ? (
+                  <Badge variant="secondary" className="bg-gold/15 text-gold">
+                    {lang}
+                  </Badge>
+                ) : null}
                 {isOwn ? (
                   <Badge variant="secondary" className="bg-cyan/15 text-cyan">
                     You
                   </Badge>
                 ) : null}
               </div>
-              <p className="truncate text-sm text-muted-foreground">{song.artist}</p>
+              {song.artist.trim() ? (
+                <p className="truncate text-sm text-muted-foreground">{song.artist}</p>
+              ) : null}
+              {song.message?.trim() ? (
+                <p className="mt-1 text-sm italic text-foreground/85">&ldquo;{song.message.trim()}&rdquo;</p>
+              ) : null}
               <p className="mt-1 text-xs text-muted-foreground">
                 {song.submittedBy}
                 {" · "}
