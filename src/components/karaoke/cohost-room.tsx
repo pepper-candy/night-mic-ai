@@ -141,7 +141,7 @@ export function CohostRoom({
         <p className="text-sm text-muted-foreground">
           Tap <span className="text-foreground">Preview link</span> on a song to embed YouTube
           or Spotify here. Edit or remove anything inappropriate. After an edit, the card shows
-          the requester name with (modified).
+          a green Verified tag next to the language.
         </p>
       </section>
 

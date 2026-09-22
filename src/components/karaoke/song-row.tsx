@@ -2,13 +2,8 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  languageLabel,
-  LYRICS_BUTTON_LABEL,
-  lyricsSearchUrl,
-  spotifyCatalogSearchUrl,
-  youtubeKaraokeSearchUrl,
-} from "@/lib/media";
+import { VerifiedBadge } from "@/components/karaoke/verified-badge";
+import { languageLabel, LYRICS_BUTTON_LABEL, lyricsSearchUrl } from "@/lib/media";
 import { timeAgo } from "@/lib/time";
 import type { QueueItem } from "@/lib/types";
 import {
@@ -59,8 +54,8 @@ export function SongRow({
   const showHostQueueActions = Boolean(isHost && song.status === "queued" && (onPlay || onMove));
   const showGuestCancel = Boolean(!staff && isOwn && song.status === "queued" && onCancel);
   const lang = languageLabel(song.language || "english", song.languageOther);
-  const youtubeHref = song.url || youtubeKaraokeSearchUrl(song.title, song.artist);
-  const spotifyHref = song.spotifyUrl || spotifyCatalogSearchUrl(song.title, song.artist);
+  const youtubeHref = song.url?.trim() || undefined;
+  const spotifyHref = song.spotifyUrl?.trim() || undefined;
 
   return (
     <article className="glow-panel p-3.5">
@@ -75,6 +70,7 @@ export function SongRow({
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h3 className="truncate text-base font-semibold leading-tight">{song.title}</h3>
+                {song.modified ? <VerifiedBadge /> : null}
                 <Badge variant="secondary" className="bg-gold/15 text-gold">
                   {lang}
                 </Badge>
@@ -87,7 +83,6 @@ export function SongRow({
               <p className="truncate text-sm text-muted-foreground">{song.artist}</p>
               <p className="mt-1 text-xs text-muted-foreground">
                 {song.submittedBy}
-                {song.modified ? " (modified)" : ""}
                 {" · "}
                 {timeAgo(song.createdAt)}
               </p>
@@ -110,7 +105,7 @@ export function SongRow({
                     rel="noreferrer"
                     className="inline-flex items-center gap-1 text-sm text-cyan underline-offset-4 hover:underline"
                   >
-                    YouTube / karaoke
+                    YouTube
                     <ExternalLinkIcon className="size-3.5" />
                   </a>
                 ) : null}

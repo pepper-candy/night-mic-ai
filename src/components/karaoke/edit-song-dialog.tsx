@@ -52,7 +52,7 @@ function EditSongForm({
             });
             onSaved(room);
             onClose();
-            toast.success("Song updated (modified).");
+            toast.success("Song updated — verified.");
           } catch (error) {
             toast.error(error instanceof Error ? error.message : "Could not edit that song.");
           } finally {
@@ -110,7 +110,7 @@ function EditSongForm({
         </div>
       ) : null}
       <div className="space-y-1.5">
-        <Label htmlFor="edit-url">YouTube / karaoke link</Label>
+        <Label htmlFor="edit-url">YouTube link</Label>
         <Input
           id="edit-url"
           type="url"
@@ -157,7 +157,7 @@ export function EditSongDialog({
         <DialogHeader>
           <DialogTitle>Edit queued song</DialogTitle>
           <DialogDescription>
-            Host and cohost edits mark the card as (modified) under the requester&apos;s name.
+            Host and cohost edits mark the card as Verified next to the language tag.
           </DialogDescription>
         </DialogHeader>
         {song && open ? (
