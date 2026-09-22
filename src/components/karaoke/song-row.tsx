@@ -150,6 +150,23 @@ export function SongRow({
               Now playing
             </Button>
           ) : null}
+          {staff && onEdit ? (
+            <Button variant="outline" className="h-11 flex-1" onClick={onEdit}>
+              <PencilIcon data-icon="inline-start" />
+              Edit
+            </Button>
+          ) : null}
+          {showPreview && onTogglePreview ? (
+            <Button variant="outline" className="h-11 flex-1" onClick={onTogglePreview}>
+              {previewOpen ? "Hide preview" : "Preview link"}
+            </Button>
+          ) : null}
+          {showGuestCancel ? (
+            <Button variant="outline" className="h-11 flex-1" onClick={onCancel}>
+              <XIcon data-icon="inline-start" />
+              Cancel my song
+            </Button>
+          ) : null}
           {showHostQueueActions && onMove ? (
             <>
               <Button
@@ -173,23 +190,6 @@ export function SongRow({
                 <ChevronDownIcon />
               </Button>
             </>
-          ) : null}
-          {staff && onEdit ? (
-            <Button variant="outline" className="h-11 flex-1" onClick={onEdit}>
-              <PencilIcon data-icon="inline-start" />
-              Edit
-            </Button>
-          ) : null}
-          {showPreview && onTogglePreview ? (
-            <Button variant="outline" className="h-11 flex-1" onClick={onTogglePreview}>
-              {previewOpen ? "Hide preview" : "Preview link"}
-            </Button>
-          ) : null}
-          {showGuestCancel ? (
-            <Button variant="outline" className="h-11 flex-1" onClick={onCancel}>
-              <XIcon data-icon="inline-start" />
-              Cancel my song
-            </Button>
           ) : null}
         </div>
       ) : null}
