@@ -16,6 +16,7 @@ export async function PATCH(
       description: body.description,
       location: body.location,
       startsAt: body.startsAt,
+      timezone: body.timezone,
       clear: body.clear,
     });
     return Response.json(room);

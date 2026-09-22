@@ -7,7 +7,7 @@ import { ErrorState, LoadingState } from "@/components/karaoke/states";
 import { Button } from "@/components/ui/button";
 import { useRoom } from "@/hooks/use-room";
 import { formatCode } from "@/lib/codes";
-import { formatEventWhen } from "@/lib/media";
+import { formatEventWhen } from "@/lib/event-time";
 import { CalendarIcon, MapPinIcon, Mic2Icon } from "lucide-react";
 
 export function InvitePage({ code }: { code: string }) {
@@ -55,7 +55,7 @@ export function InvitePage({ code }: { code: string }) {
 
       {event ? (
         <div className="space-y-4">
-          <EventCountdown startsAt={event.startsAt} />
+          <EventCountdown startsAt={event.startsAt} timezone={event.timezone} />
 
           <section className="glow-panel space-y-3 p-5">
             {event.description ? (
@@ -69,7 +69,7 @@ export function InvitePage({ code }: { code: string }) {
             <div className="space-y-2 pt-1 text-sm">
               <p className="flex items-start gap-2 text-muted-foreground">
                 <CalendarIcon className="mt-0.5 size-4 shrink-0 text-gold" />
-                <span>{formatEventWhen(event.startsAt)}</span>
+                <span>{formatEventWhen(event.startsAt, event.timezone)}</span>
               </p>
               {event.location ? (
                 <p className="flex items-start gap-2 text-muted-foreground">

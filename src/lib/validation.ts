@@ -10,6 +10,11 @@ import {
   type EventInfo,
   type SongLanguage,
 } from "@/lib/types";
+import {
+  DEFAULT_EVENT_TIMEZONE,
+  isEventTimezone,
+  zonedLocalToUtcMs,
+} from "@/lib/event-time";
 
 export function trim(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
@@ -82,6 +87,7 @@ export function validateEventInput(input: {
   description: unknown;
   location: unknown;
   startsAt: unknown;
+  timezone?: unknown;
 }): EventInfo {
   const title = trim(input.title);
   const description = trim(input.description);
@@ -98,11 +104,24 @@ export function validateEventInput(input: {
     throw new Error(`Keep the location under ${MAX_EVENT_LOCATION} characters.`);
   }
 
+  const timezoneRaw = trim(input.timezone);
+  const timezone = timezoneRaw
+    ? timezoneRaw
+    : DEFAULT_EVENT_TIMEZONE;
+  if (!isEventTimezone(timezone)) {
+    throw new Error("Pick a timezone from the list. Default is Hong Kong (HKT).");
+  }
+
   let startsAt: number;
   if (typeof input.startsAt === "number") {
     startsAt = input.startsAt;
   } else if (typeof input.startsAt === "string" && input.startsAt.trim()) {
-    startsAt = Date.parse(input.startsAt);
+    const raw = input.startsAt.trim();
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(raw) && !/[zZ]|[+-]\d{2}:\d{2}$/.test(raw)) {
+      startsAt = zonedLocalToUtcMs(raw, timezone);
+    } else {
+      startsAt = Date.parse(raw);
+    }
   } else {
     throw new Error("Set a start date and time for the event.");
   }
@@ -116,5 +135,6 @@ export function validateEventInput(input: {
     description,
     location,
     startsAt,
+    timezone,
   };
 }

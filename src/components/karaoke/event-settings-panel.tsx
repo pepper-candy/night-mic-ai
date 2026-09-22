@@ -6,7 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { updateEvent } from "@/lib/api-client";
-import { formatEventWhen, toDatetimeLocalValue } from "@/lib/media";
+import {
+  EVENT_TIMEZONES,
+  formatEventWhen,
+  resolveEventTimezone,
+  toDatetimeLocalInZone,
+} from "@/lib/event-time";
 import type { EventInfo, PublicRoom } from "@/lib/types";
 
 function EventForm({
@@ -23,8 +28,9 @@ function EventForm({
   const [title, setTitle] = useState(event?.title ?? "");
   const [description, setDescription] = useState(event?.description ?? "");
   const [location, setLocation] = useState(event?.location ?? "");
+  const [timezone, setTimezone] = useState(resolveEventTimezone(event?.timezone));
   const [startsAt, setStartsAt] = useState(
-    event ? toDatetimeLocalValue(event.startsAt) : "",
+    event ? toDatetimeLocalInZone(event.startsAt, resolveEventTimezone(event.timezone)) : "",
   );
   const [pending, setPending] = useState(false);
 
@@ -38,6 +44,7 @@ function EventForm({
         description,
         location,
         startsAt,
+        timezone,
       });
       onUpdated(room);
       toast.success("Invitation details saved.");
@@ -107,6 +114,24 @@ function EventForm({
         />
       </div>
       <div className="space-y-1.5">
+        <Label htmlFor="event-timezone">Timezone</Label>
+        <select
+          id="event-timezone"
+          value={timezone}
+          onChange={(e) => setTimezone(e.target.value)}
+          className="h-12 w-full rounded-lg border border-input bg-transparent px-2.5 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+        >
+          {EVENT_TIMEZONES.map((zone) => (
+            <option key={zone.id} value={zone.id}>
+              {zone.label}
+            </option>
+          ))}
+        </select>
+        <p className="text-xs text-muted-foreground">
+          Default is Hong Kong (HKT, UTC+8). Start time is wall-clock in this zone.
+        </p>
+      </div>
+      <div className="space-y-1.5">
         <Label htmlFor="event-starts">Start date & time</Label>
         <Input
           id="event-starts"
@@ -148,7 +173,9 @@ export function EventSettingsPanel({
 }) {
   const [open, setOpen] = useState(Boolean(event));
   const [, setBusy] = useState(false);
-  const formKey = event ? `${event.title}-${event.startsAt}-${event.location}` : "new-event";
+  const formKey = event
+    ? `${event.title}-${event.startsAt}-${event.location}-${event.timezone ?? ""}`
+    : "new-event";
 
   return (
     <section className="glow-panel space-y-3 p-4">
@@ -169,7 +196,7 @@ export function EventSettingsPanel({
         <p className="text-sm text-muted-foreground">
           <span className="text-foreground">{event.title}</span>
           {" · "}
-          {formatEventWhen(event.startsAt)}
+          {formatEventWhen(event.startsAt, event.timezone)}
           {event.location ? ` · ${event.location}` : ""}
         </p>
       ) : null}

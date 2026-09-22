@@ -6,7 +6,11 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { saveDisplayName, useDisplayName } from "@/hooks/use-identity";
+import {
+  bindRoomNickname,
+  useHasHydrated,
+  useRoomNickname,
+} from "@/hooks/use-identity";
 import { fetchRoom } from "@/lib/api-client";
 import { formatCode, normalizeCode } from "@/lib/codes";
 
@@ -18,27 +22,30 @@ export function JoinForm({
   compact?: boolean;
 }) {
   const router = useRouter();
-  const storedName = useDisplayName();
+  const hydrated = useHasHydrated();
   const [code, setCode] = useState(initialCode);
   const [draftName, setDraftName] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
-  const name = draftName ?? storedName;
+  const normalized = normalizeCode(code);
+  const lockedName = useRoomNickname(normalized);
+  const isLocked = hydrated && Boolean(lockedName);
+  const name = isLocked ? lockedName : (draftName ?? "");
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
-    const normalized = normalizeCode(code);
     if (!normalized) {
       toast.error("Enter the room code they shouted.");
       return;
     }
-    if (!name.trim()) {
-      toast.error("Pick a display name first.");
+    const nickname = name.trim();
+    if (!nickname) {
+      toast.error("Pick a nickname so the room knows who queued it.");
       return;
     }
     setPending(true);
     try {
       await fetchRoom(normalized);
-      saveDisplayName(name);
+      bindRoomNickname(normalized, nickname);
       router.push(`/room/${normalized}`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not join that room.");
@@ -54,8 +61,8 @@ export function JoinForm({
           <p className="font-display text-3xl tracking-wide">Jump in</p>
           <p className="text-sm text-muted-foreground">
             {initialCode
-              ? `You're heading to ${formatCode(normalizeCode(initialCode))}. Tell the room who you are.`
-              : "Type the room code and a name people will see on the queue."}
+              ? `You're heading to ${formatCode(normalizeCode(initialCode))}. Pick a nickname for this room.`
+              : "Type the room code and a nickname people will see on the queue."}
           </p>
         </div>
       ) : null}
@@ -76,7 +83,7 @@ export function JoinForm({
         </div>
       ) : null}
       <div className="space-y-1.5">
-        <Label htmlFor="join-name">Display name</Label>
+        <Label htmlFor="join-name">Nickname</Label>
         <Input
           id="join-name"
           value={name}
@@ -85,7 +92,19 @@ export function JoinForm({
           className="h-12 text-base"
           maxLength={24}
           required
+          readOnly={isLocked}
+          aria-readonly={isLocked}
         />
+        {isLocked ? (
+          <p className="text-xs text-muted-foreground">
+            Locked for this room on this device. Incognito or another browser can still pick a
+            different name.
+          </p>
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            Required. This nickname stays on this device for this room.
+          </p>
+        )}
       </div>
       <Button type="submit" disabled={pending} className="h-12 w-full text-base neon-button">
         {pending ? "Finding the room…" : "Join the queue"}

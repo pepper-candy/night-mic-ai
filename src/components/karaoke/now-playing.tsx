@@ -2,7 +2,13 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { languageLabel, lyricsSearchButtonLabel, lyricsSearchUrl } from "@/lib/media";
+import {
+  languageLabel,
+  LYRICS_BUTTON_LABEL,
+  lyricsSearchUrl,
+  spotifyCatalogSearchUrl,
+  youtubeKaraokeSearchUrl,
+} from "@/lib/media";
 import { timeAgo } from "@/lib/time";
 import type { QueueItem } from "@/lib/types";
 import { ExternalLinkIcon, SkipForwardIcon } from "lucide-react";
@@ -10,10 +16,12 @@ import { ExternalLinkIcon, SkipForwardIcon } from "lucide-react";
 export function NowPlaying({
   song,
   isHost,
+  showLyrics = true,
   onSkip,
 }: {
   song: QueueItem | null;
   isHost?: boolean;
+  showLyrics?: boolean;
   onSkip?: () => void;
 }) {
   if (!song) {
@@ -29,6 +37,8 @@ export function NowPlaying({
   }
 
   const lang = languageLabel(song.language || "english", song.languageOther);
+  const youtubeHref = song.url || youtubeKaraokeSearchUrl(song.title, song.artist);
+  const spotifyHref = song.spotifyUrl || spotifyCatalogSearchUrl(song.title, song.artist);
 
   return (
     <section className="now-playing px-5 py-6">
@@ -48,34 +58,36 @@ export function NowPlaying({
         {song.startedAt ? ` · started ${timeAgo(song.startedAt)}` : ""}
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
-        <Button
-          variant="outline"
-          className="h-12 max-w-full flex-1 truncate"
-          render={
-            <a
-              href={lyricsSearchUrl(song.title, song.language)}
-              target="_blank"
-              rel="noreferrer"
-            />
-          }
-        >
-          {lyricsSearchButtonLabel(song.title, song.language)}
-        </Button>
-        {song.url ? (
+        {showLyrics ? (
           <Button
             variant="outline"
-            className="h-12 flex-1"
-            render={<a href={song.url} target="_blank" rel="noreferrer" />}
+            className="h-12 max-w-full flex-1 truncate"
+            render={
+              <a
+                href={lyricsSearchUrl(song.title, song.language)}
+                target="_blank"
+                rel="noreferrer"
+              />
+            }
           >
-            <ExternalLinkIcon data-icon="inline-start" />
-            Open track
+            {LYRICS_BUTTON_LABEL}
           </Button>
         ) : null}
-        {song.spotifyUrl ? (
+        {youtubeHref ? (
           <Button
             variant="outline"
             className="h-12 flex-1"
-            render={<a href={song.spotifyUrl} target="_blank" rel="noreferrer" />}
+            render={<a href={youtubeHref} target="_blank" rel="noreferrer" />}
+          >
+            <ExternalLinkIcon data-icon="inline-start" />
+            YouTube / karaoke
+          </Button>
+        ) : null}
+        {spotifyHref ? (
+          <Button
+            variant="outline"
+            className="h-12 flex-1"
+            render={<a href={spotifyHref} target="_blank" rel="noreferrer" />}
           >
             <ExternalLinkIcon data-icon="inline-start" />
             Spotify

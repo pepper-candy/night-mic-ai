@@ -238,6 +238,7 @@ export async function hostUpdateEvent(
     description: unknown;
     location: unknown;
     startsAt: unknown;
+    timezone?: unknown;
     clear?: unknown;
   },
 ) {

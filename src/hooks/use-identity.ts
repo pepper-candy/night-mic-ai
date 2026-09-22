@@ -2,10 +2,12 @@
 
 import { useSyncExternalStore } from "react";
 import {
+  bindRoomNickname as persistRoomNickname,
   getCohostToken,
   getDisplayName,
   getGuestId,
   getHostToken,
+  getRoomNickname,
   getStaffToken,
   setCohostToken as persistCohostToken,
   setDisplayName as persistDisplayName,
@@ -39,6 +41,14 @@ export function useDisplayName() {
   return useSyncExternalStore(subscribe, getDisplayName, () => "");
 }
 
+export function useRoomNickname(code: string) {
+  return useSyncExternalStore(
+    subscribe,
+    () => (code ? getRoomNickname(code) : ""),
+    () => "",
+  );
+}
+
 export function useGuestId() {
   return useSyncExternalStore(subscribe, getGuestId, () => "");
 }
@@ -70,6 +80,13 @@ export function useStaffToken(code: string) {
 export function saveDisplayName(name: string) {
   persistDisplayName(name);
   emitIdentityChange();
+}
+
+export function bindRoomNickname(code: string, name: string) {
+  const bound = persistRoomNickname(code, name);
+  persistDisplayName(bound);
+  emitIdentityChange();
+  return bound;
 }
 
 export function saveHostToken(code: string, token: string) {

@@ -2,7 +2,13 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { languageLabel, lyricsSearchButtonLabel, lyricsSearchUrl } from "@/lib/media";
+import {
+  languageLabel,
+  LYRICS_BUTTON_LABEL,
+  lyricsSearchUrl,
+  spotifyCatalogSearchUrl,
+  youtubeKaraokeSearchUrl,
+} from "@/lib/media";
 import { timeAgo } from "@/lib/time";
 import type { QueueItem } from "@/lib/types";
 import {
@@ -53,6 +59,8 @@ export function SongRow({
   const showHostQueueActions = Boolean(isHost && song.status === "queued" && (onPlay || onMove));
   const showGuestCancel = Boolean(!staff && isOwn && song.status === "queued" && onCancel);
   const lang = languageLabel(song.language || "english", song.languageOther);
+  const youtubeHref = song.url || youtubeKaraokeSearchUrl(song.title, song.artist);
+  const spotifyHref = song.spotifyUrl || spotifyCatalogSearchUrl(song.title, song.artist);
 
   return (
     <article className="glow-panel p-3.5">
@@ -84,18 +92,20 @@ export function SongRow({
                 {timeAgo(song.createdAt)}
               </p>
               <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1">
-                <a
-                  href={lyricsSearchUrl(song.title, song.language)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex max-w-full items-center gap-1 truncate text-sm text-gold underline-offset-4 hover:underline"
-                  title="Search lyrics on Google"
-                >
-                  {lyricsSearchButtonLabel(song.title, song.language)}
-                </a>
-                {song.url ? (
+                {!staff ? (
                   <a
-                    href={song.url}
+                    href={lyricsSearchUrl(song.title, song.language)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex max-w-full items-center gap-1 truncate text-sm text-gold underline-offset-4 hover:underline"
+                    title="Search lyrics on Google"
+                  >
+                    {LYRICS_BUTTON_LABEL}
+                  </a>
+                ) : null}
+                {youtubeHref ? (
+                  <a
+                    href={youtubeHref}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex items-center gap-1 text-sm text-cyan underline-offset-4 hover:underline"
@@ -104,9 +114,9 @@ export function SongRow({
                     <ExternalLinkIcon className="size-3.5" />
                   </a>
                 ) : null}
-                {song.spotifyUrl ? (
+                {spotifyHref ? (
                   <a
-                    href={song.spotifyUrl}
+                    href={spotifyHref}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex items-center gap-1 text-sm text-cyan underline-offset-4 hover:underline"
@@ -140,6 +150,23 @@ export function SongRow({
               Now playing
             </Button>
           ) : null}
+          {staff && onEdit ? (
+            <Button variant="outline" className="h-11 flex-1" onClick={onEdit}>
+              <PencilIcon data-icon="inline-start" />
+              Edit
+            </Button>
+          ) : null}
+          {showPreview && onTogglePreview ? (
+            <Button variant="outline" className="h-11 flex-1" onClick={onTogglePreview}>
+              {previewOpen ? "Hide preview" : "Preview link"}
+            </Button>
+          ) : null}
+          {showGuestCancel ? (
+            <Button variant="outline" className="h-11 flex-1" onClick={onCancel}>
+              <XIcon data-icon="inline-start" />
+              Cancel my song
+            </Button>
+          ) : null}
           {showHostQueueActions && onMove ? (
             <>
               <Button
@@ -163,23 +190,6 @@ export function SongRow({
                 <ChevronDownIcon />
               </Button>
             </>
-          ) : null}
-          {staff && onEdit ? (
-            <Button variant="outline" className="h-11 flex-1" onClick={onEdit}>
-              <PencilIcon data-icon="inline-start" />
-              Edit
-            </Button>
-          ) : null}
-          {showPreview && onTogglePreview ? (
-            <Button variant="outline" className="h-11 flex-1" onClick={onTogglePreview}>
-              {previewOpen ? "Hide preview" : "Preview link"}
-            </Button>
-          ) : null}
-          {showGuestCancel ? (
-            <Button variant="outline" className="h-11 flex-1" onClick={onCancel}>
-              <XIcon data-icon="inline-start" />
-              Cancel my song
-            </Button>
           ) : null}
         </div>
       ) : null}

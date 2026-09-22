@@ -1,13 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { eventTimezoneLabel, formatEventWhen } from "@/lib/event-time";
 import { countdownParts } from "@/lib/time";
 
 function Pad({ value }: { value: number }) {
   return <span className="tabular-nums">{String(value).padStart(2, "0")}</span>;
 }
 
-export function EventCountdown({ startsAt }: { startsAt: number }) {
+export function EventCountdown({
+  startsAt,
+  timezone,
+}: {
+  startsAt: number;
+  timezone?: string;
+}) {
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -16,6 +23,14 @@ export function EventCountdown({ startsAt }: { startsAt: number }) {
   }, []);
 
   const parts = countdownParts(startsAt, now);
+  const zoneNote = (
+    <p className="mt-3 text-sm text-muted-foreground">
+      {formatEventWhen(startsAt, timezone)}
+      <span className="mt-1 block text-[10px] uppercase tracking-[0.18em]">
+        {eventTimezoneLabel(timezone)}
+      </span>
+    </p>
+  );
 
   if (parts.done) {
     return (
@@ -23,6 +38,7 @@ export function EventCountdown({ startsAt }: { startsAt: number }) {
         <p className="text-[11px] uppercase tracking-[0.28em] text-gold">It&apos;s time</p>
         <p className="mt-2 font-display text-4xl tracking-wide text-gold">Doors are open</p>
         <p className="mt-1 text-sm text-muted-foreground">Join the room and get on the list.</p>
+        {zoneNote}
       </div>
     );
   }
@@ -47,6 +63,7 @@ export function EventCountdown({ startsAt }: { startsAt: number }) {
           </div>
         ))}
       </div>
+      {zoneNote}
     </div>
   );
 }

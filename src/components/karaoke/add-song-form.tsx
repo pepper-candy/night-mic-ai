@@ -6,8 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { searchSongs, submitSong } from "@/lib/api-client";
-import { getDisplayName, getGuestId } from "@/lib/identity";
-import type { PublicRoom, SongLanguage, SongSearchHit } from "@/lib/types";
+import { getGuestId, getRoomNickname } from "@/lib/identity";
+import {
+  MAX_URL,
+  SONG_LANGUAGE_LABELS,
+  type PublicRoom,
+  type SongLanguage,
+  type SongSearchHit,
+} from "@/lib/types";
 import { SearchIcon, XIcon } from "lucide-react";
 
 const LANGUAGE_OPTIONS: Array<{ value: SongLanguage; label: string }> = [
@@ -19,9 +25,12 @@ const LANGUAGE_OPTIONS: Array<{ value: SongLanguage; label: string }> = [
 export function AddSongForm({
   code,
   onAdded,
+  asName,
 }: {
   code: string;
   onAdded: (room: PublicRoom) => void;
+  /** Host/cohost songs can skip the guest nickname. */
+  asName?: string;
 }) {
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState("");
@@ -81,16 +90,31 @@ export function AddSongForm({
   function applyHit(hit: SongSearchHit) {
     setTitle(hit.title);
     setArtist(hit.artist);
-    if (hit.url) setUrl(hit.url);
-    if (hit.spotifyUrl) setSpotifyUrl(hit.spotifyUrl);
+    setUrl(hit.url ?? "");
+    setSpotifyUrl(hit.spotifyUrl ?? "");
+    if (hit.language) {
+      setLanguage(hit.language);
+      setLanguageOther(hit.language === "other" ? hit.languageOther ?? "" : "");
+    }
     setShowSuggestions(false);
-    toast.success("Filled from search — tweak if needed.");
+    toast.success("Filled author, language, and YouTube / Spotify — tweak if needed.");
+  }
+
+  function hitLanguageLabel(hit: SongSearchHit): string | undefined {
+    if (!hit.language) return undefined;
+    if (hit.language === "other") return hit.languageOther?.trim() || "Other";
+    return SONG_LANGUAGE_LABELS[hit.language];
   }
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!language) {
       toast.error("Pick a song language category.");
+      return;
+    }
+    const displayName = (asName ?? getRoomNickname(code)).trim();
+    if (!displayName) {
+      toast.error("Pick a nickname before adding a song.");
       return;
     }
     setPending(true);
@@ -102,7 +126,7 @@ export function AddSongForm({
         spotifyUrl,
         language,
         languageOther: language === "other" ? languageOther : undefined,
-        displayName: getDisplayName() || "Mystery singer",
+        displayName,
         guestId: getGuestId(),
       });
       onAdded(room);
@@ -126,7 +150,9 @@ export function AddSongForm({
       <div>
         <p className="font-display text-2xl tracking-wide">Throw a song on</p>
         <p className="text-sm text-muted-foreground">
-          Search as you type, or tap the magnifier. Pick a language so the room stays mixed.
+          Search as you type, or tap the magnifier. Pick a match to fill artist, language
+          (when we can tell), and YouTube / Spotify search links so people can tap and find
+          the song.
         </p>
       </div>
 
@@ -172,22 +198,26 @@ export function AddSongForm({
           </Button>
           {showSuggestions && suggestions.length > 0 ? (
             <ul className="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-xl border border-border bg-card p-1 shadow-lg">
-              {suggestions.map((hit) => (
-                <li key={hit.id}>
-                  <button
-                    type="button"
-                    className="flex w-full flex-col items-start rounded-lg px-3 py-2 text-left hover:bg-secondary"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => applyHit(hit)}
-                  >
-                    <span className="text-sm font-medium">{hit.title}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {hit.artist}
-                      <span className="text-muted-foreground/70"> · {hit.source}</span>
-                    </span>
-                  </button>
-                </li>
-              ))}
+              {suggestions.map((hit) => {
+                const languageGuess = hitLanguageLabel(hit);
+                return (
+                  <li key={hit.id}>
+                    <button
+                      type="button"
+                      className="flex w-full flex-col items-start rounded-lg px-3 py-2 text-left hover:bg-secondary"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => applyHit(hit)}
+                    >
+                      <span className="text-sm font-medium">{hit.title}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {hit.artist}
+                        {languageGuess ? ` · ${languageGuess}` : ""}
+                        <span className="text-muted-foreground/70"> · {hit.source}</span>
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           ) : null}
         </div>
@@ -244,30 +274,30 @@ export function AddSongForm({
       ) : null}
 
       <div className="space-y-1.5">
-        <Label htmlFor="song-url">YouTube / karaoke link (optional)</Label>
+          <Label htmlFor="song-url">YouTube / karaoke (optional — filled from search)</Label>
         <Input
           id="song-url"
           type="url"
           value={url}
           onChange={(event) => setUrl(event.target.value)}
-          placeholder="https://"
+          placeholder="https://www.youtube.com/results?search_query=…"
           className="h-12 text-base"
-          maxLength={300}
+          maxLength={MAX_URL}
           autoComplete="off"
         />
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="song-spotify">Spotify link (optional)</Label>
+          <Label htmlFor="song-spotify">Spotify (optional — filled from search)</Label>
         <div className="relative">
           <Input
             id="song-spotify"
             type="url"
             value={spotifyUrl}
             onChange={(event) => setSpotifyUrl(event.target.value)}
-            placeholder="https://open.spotify.com/…"
+            placeholder="https://open.spotify.com/search/…"
             className="h-12 pr-10 text-base"
-            maxLength={300}
+            maxLength={MAX_URL}
             autoComplete="off"
           />
           {spotifyUrl ? (

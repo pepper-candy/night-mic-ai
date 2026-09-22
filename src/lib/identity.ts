@@ -1,5 +1,8 @@
+import { normalizeCode } from "@/lib/codes";
+
 const GUEST_ID_KEY = "kara.guestId";
 const NAME_KEY = "kara.displayName";
+const ROOM_NICKNAMES_KEY = "kara.roomNicknames";
 const HOST_TOKENS_KEY = "kara.hostTokens";
 const COHOST_TOKENS_KEY = "kara.cohostTokens";
 
@@ -30,6 +33,32 @@ export function getDisplayName(): string {
 
 export function setDisplayName(name: string) {
   window.localStorage.setItem(NAME_KEY, name.trim());
+}
+
+/** Nickname locked to this device for one room/event. Empty if they have not joined yet. */
+export function getRoomNickname(code: string): string {
+  const key = normalizeCode(code);
+  if (!key) return "";
+  const names = readJson<Record<string, string>>(ROOM_NICKNAMES_KEY, {});
+  return names[key]?.trim() ?? "";
+}
+
+/**
+ * Bind a nickname to this device + room. If one already exists, it is kept
+ * (incognito / another browser can still pick a new name — we only lock this device).
+ */
+export function bindRoomNickname(code: string, name: string): string {
+  if (typeof window === "undefined") return name.trim();
+  const key = normalizeCode(code);
+  if (!key) return "";
+  const names = readJson<Record<string, string>>(ROOM_NICKNAMES_KEY, {});
+  const existing = names[key]?.trim();
+  if (existing) return existing;
+  const next = name.trim();
+  if (!next) return "";
+  names[key] = next;
+  window.localStorage.setItem(ROOM_NICKNAMES_KEY, JSON.stringify(names));
+  return next;
 }
 
 export function getHostToken(code: string): string | undefined {

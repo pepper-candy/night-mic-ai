@@ -104,6 +104,7 @@ export async function updateEvent(
     description: string;
     location: string;
     startsAt: string | number;
+    timezone?: string;
     clear?: boolean;
   },
 ): Promise<PublicRoom> {
