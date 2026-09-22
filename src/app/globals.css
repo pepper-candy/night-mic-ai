@@ -149,6 +149,41 @@
     color: var(--foreground);
     padding: 0;
   }
+
+  /*
+    Overlay mode: hide native datetime text (often clipped or underlined
+    on mobile) so our placeholder / formatted value can sit inside the field.
+  */
+  input.datetime-local-overlay {
+    color: transparent;
+    caret-color: transparent;
+    border-bottom-style: none;
+    border-bottom-width: 0;
+    box-shadow: none;
+    text-decoration: none;
+    background-image: none;
+  }
+
+  input.datetime-local-overlay:focus,
+  input.datetime-local-overlay:focus-visible {
+    border-bottom-style: none;
+    border-bottom-width: 0;
+    box-shadow: none;
+    outline: none;
+  }
+
+  input.datetime-local-overlay::-webkit-datetime-edit,
+  input.datetime-local-overlay::-webkit-datetime-edit-fields-wrapper,
+  input.datetime-local-overlay::-webkit-datetime-edit-text,
+  input.datetime-local-overlay::-webkit-datetime-edit-year-field,
+  input.datetime-local-overlay::-webkit-datetime-edit-month-field,
+  input.datetime-local-overlay::-webkit-datetime-edit-day-field,
+  input.datetime-local-overlay::-webkit-datetime-edit-hour-field,
+  input.datetime-local-overlay::-webkit-datetime-edit-minute-field,
+  input.datetime-local-overlay::-webkit-datetime-edit-ampm-field {
+    color: transparent;
+    opacity: 0;
+  }
 }
 
 @utility font-display {
