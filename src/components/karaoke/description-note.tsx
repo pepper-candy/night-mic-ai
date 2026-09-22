@@ -30,15 +30,15 @@ export function DescriptionNote({ text }: { text: string }) {
   if (!line) return null;
 
   return (
-    <div className="relative flex h-11 items-center overflow-hidden rounded-2xl border border-gold/20 bg-[#1a0820] px-3">
-      <div className="pointer-events-none absolute inset-0" aria-hidden>
-        <EighthNote className="absolute top-1.5 left-2 size-5 text-gold/20" />
-        <BeamedNotes className="absolute top-2 right-14 size-5 text-cyan/15" />
-        <EighthNote className="absolute top-1.5 right-2.5 size-5 text-gold/25" />
+    <div className="relative flex min-h-14 items-center overflow-hidden rounded-2xl border border-gold/20 bg-[#1a0820] px-3 py-3">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+        <EighthNote className="absolute top-1/2 left-2 size-5 -translate-y-1/2 text-gold/20" />
+        <BeamedNotes className="absolute top-1/2 right-14 size-5 -translate-y-1/2 text-cyan/15" />
+        <EighthNote className="absolute top-1/2 right-2.5 size-5 -translate-y-1/2 text-gold/25" />
       </div>
       <p
         title={line}
-        className="relative min-w-0 flex-1 truncate px-7 text-center font-display text-base leading-none tracking-wide text-gold/90"
+        className="relative min-w-0 flex-1 truncate px-7 text-center font-display text-base leading-7 tracking-wide text-gold/90"
       >
         {line}
       </p>

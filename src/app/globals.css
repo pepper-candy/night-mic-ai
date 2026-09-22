@@ -211,6 +211,17 @@
     linear-gradient(180deg, #1c0524 0%, #140018 45%, #0d0612 100%);
 }
 
+/* Invite / upcoming-event score sheet: soft staff + neon bloom, edges fade. */
+@utility music-score-atmosphere {
+  background-color: rgb(26 8 32 / 28%);
+  box-shadow:
+    0 0 48px rgb(255 47 146 / 12%),
+    0 0 28px rgb(24 231 255 / 8%),
+    inset 0 0 52px rgb(255 210 74 / 5%);
+  -webkit-mask-image: radial-gradient(ellipse 108% 96% at 50% 38%, #000 42%, transparent 80%);
+  mask-image: radial-gradient(ellipse 108% 96% at 50% 38%, #000 42%, transparent 80%);
+}
+
 @utility now-playing {
   border-radius: var(--radius-xl);
   background:
