@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { DateTimeLocalInput } from "@/components/karaoke/datetime-local-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -133,17 +134,15 @@ function EventForm({
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="event-starts">Start date & time</Label>
-        <Input
+        <DateTimeLocalInput
           id="event-starts"
-          type="datetime-local"
           value={startsAt}
           onChange={(e) => setStartsAt(e.target.value)}
-          className="h-12 text-base"
           required
         />
       </div>
       <div className="flex flex-col gap-2 sm:flex-row">
-        <Button type="submit" disabled={pending} className="h-12 flex-1 neon-button">
+        <Button type="submit" disabled={pending} className="h-12 min-h-12 flex-1 neon-button">
           {pending ? "Saving…" : "Save invitation"}
         </Button>
         {event ? (
@@ -151,7 +150,7 @@ function EventForm({
             type="button"
             variant="outline"
             disabled={pending}
-            className="h-12 flex-1"
+            className="h-12 min-h-12 flex-1"
             onClick={() => void onClear()}
           >
             Clear
@@ -187,7 +186,7 @@ export function EventSettingsPanel({
             Guests open the invite link and see a live countdown plus basic event info.
           </p>
         </div>
-        <Button variant="outline" className="h-10 shrink-0" onClick={() => setOpen((v) => !v)}>
+        <Button variant="outline" className="h-12 min-h-12 shrink-0 px-4" onClick={() => setOpen((v) => !v)}>
           {open ? "Hide" : "Set up"}
         </Button>
       </div>

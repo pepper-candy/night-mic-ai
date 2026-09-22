@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { DateTimeLocalInput } from "@/components/karaoke/datetime-local-input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { setQueueGate } from "@/lib/api-client";
 import { resolveEventTimezone, toDatetimeLocalInZone } from "@/lib/event-time";
 import { isQueueAccepting } from "@/lib/queue-gate";
@@ -64,29 +64,28 @@ export function QueueGatePanel({
           type="button"
           disabled={pending}
           variant={accepting ? "outline" : "default"}
-          className={`h-12 shrink-0 px-5 ${accepting ? "" : "neon-button"}`}
+          className={`h-12 min-h-12 shrink-0 px-5 ${accepting ? "" : "neon-button"}`}
           onClick={() => void save(!accepting, false)}
         >
           {pending ? "…" : accepting ? "Pause" : "On"}
         </Button>
 
-        <div className="flex min-w-0 flex-1 items-center gap-2 rounded-lg border border-input bg-transparent px-2 dark:bg-input/30">
-          <span className="hidden shrink-0 text-xs text-muted-foreground sm:inline">
+        <div className="flex h-12 min-h-12 min-w-0 flex-1 items-stretch gap-0.5 rounded-lg border border-input bg-transparent pl-1 dark:bg-input/30">
+          <span className="hidden shrink-0 self-center pl-1 text-xs text-muted-foreground sm:inline">
             After this date
           </span>
-          <Input
+          <DateTimeLocalInput
             id="queue-opens"
-            type="datetime-local"
             value={opensAt}
             onChange={(event) => setOpensAt(event.target.value)}
             aria-label="After this date"
-            className="h-11 min-w-0 flex-1 border-0 bg-transparent px-1 shadow-none focus-visible:ring-0 dark:bg-transparent"
+            className="h-12 min-h-12 border-0 bg-transparent px-1 shadow-none focus-visible:ring-0 dark:bg-transparent"
           />
           <Button
             type="button"
             size="icon"
             variant="ghost"
-            className="size-11 shrink-0"
+            className="size-12 min-h-12 min-w-12 shrink-0 self-center"
             disabled={pending || !opensAt}
             aria-label="Update open date"
             onClick={() => void save(false, true)}

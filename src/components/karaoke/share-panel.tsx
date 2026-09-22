@@ -78,7 +78,7 @@ export function SharePanel({
         </p>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        <Button className="h-12" variant="outline" onClick={() => void copy("code", code)}>
+        <Button className="h-12 min-h-12" variant="outline" onClick={() => void copy("code", code)}>
           {copied === "code" ? (
             <CheckIcon data-icon="inline-start" />
           ) : (
@@ -86,14 +86,14 @@ export function SharePanel({
           )}
           Copy code
         </Button>
-        <Button className="h-12 neon-button" onClick={() => void nativeShare()}>
+        <Button className="h-12 min-h-12 neon-button" onClick={() => void nativeShare()}>
           <Share2Icon data-icon="inline-start" />
           Share
         </Button>
       </div>
       <Button
         variant="outline"
-        className="h-11 w-full"
+        className="h-12 min-h-12 w-full"
         onClick={() => void copy("invite", inviteUrl)}
       >
         {copied === "invite" ? (
@@ -103,7 +103,7 @@ export function SharePanel({
         )}
         Copy invitation link
       </Button>
-      <Button variant="ghost" className="h-11 w-full" onClick={() => setQrOpen(true)}>
+      <Button variant="ghost" className="h-12 min-h-12 w-full" onClick={() => setQrOpen(true)}>
         <QrCodeIcon data-icon="inline-start" />
         Show join QR
       </Button>
