@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { YoutubeSearchPicker } from "@/components/karaoke/youtube-search-picker";
 import { songAction } from "@/lib/api-client";
 import { assignMediaLink, combinedMediaLink } from "@/lib/media";
 import { MAX_MESSAGE, MAX_URL, type PublicRoom, type QueueItem, type SongLanguage } from "@/lib/types";
@@ -111,14 +112,15 @@ function EditSongForm({
           />
         </div>
       ) : null}
+      <YoutubeSearchPicker title={title} artist={artist} onPick={setLink} />
       <div className="space-y-1.5">
-        <Label htmlFor="edit-link">Link?</Label>
+        <Label htmlFor="edit-link">YouTube or Spotify link</Label>
         <Input
           id="edit-link"
           type="url"
           value={link}
           onChange={(e) => setLink(e.target.value)}
-          placeholder="https://open.spotify.com/…"
+          placeholder="https://www.youtube.com/watch?v=…"
           className="h-11"
           maxLength={MAX_URL}
         />

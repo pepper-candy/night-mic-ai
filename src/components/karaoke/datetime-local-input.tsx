@@ -29,7 +29,7 @@ export function DateTimeLocalInput({
         {...props}
         type="datetime-local"
         className={cn(
-          "h-12 min-h-12 w-full pr-11 text-base leading-normal scheme-dark",
+          "h-12 min-h-12 w-full min-w-0 pr-11 text-base leading-normal text-foreground scheme-dark",
           className,
         )}
       />

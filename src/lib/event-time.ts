@@ -54,6 +54,28 @@ function zoneParts(ms: number, timeZone: string) {
   };
 }
 
+/** Readable wall-clock label for a `datetime-local` value (no timezone shift). */
+export function formatDatetimeLocalValue(local: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(local.trim());
+  if (!match) return "";
+  const date = new Date(
+    Number(match[1]),
+    Number(match[2]) - 1,
+    Number(match[3]),
+    Number(match[4]),
+    Number(match[5]),
+  );
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("en-GB", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(date);
+}
+
 /** Wall-clock value for <input type="datetime-local" /> in the event timezone. */
 export function toDatetimeLocalInZone(ms: number, timeZone: string): string {
   const p = zoneParts(ms, timeZone);

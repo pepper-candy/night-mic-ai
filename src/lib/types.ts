@@ -94,6 +94,16 @@ export interface SongSearchHit {
   source: string;
 }
 
+export interface YoutubeSearchHit {
+  videoId: string;
+  title: string;
+  channel: string;
+  thumbnailUrl: string;
+  url: string;
+  /** Human duration from videos.list, e.g. `4:33`. */
+  duration?: string;
+}
+
 export interface ApiError {
   error: string;
 }

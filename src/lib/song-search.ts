@@ -7,7 +7,6 @@ import {
   type SongLanguage,
   type SongSearchHit,
 } from "@/lib/types";
-
 /** Strip movie/OST/feat clutter so karaoke titles stay readable. */
 export function cleanSongTitle(raw: string): string {
   let title = raw.trim();
@@ -45,12 +44,6 @@ interface SpotifyTrack {
 
 interface SpotifySearchResponse {
   tracks?: { items?: SpotifyTrack[] };
-}
-
-interface YoutubeSearchResponse {
-  items?: Array<{
-    id?: { videoId?: string };
-  }>;
 }
 
 let spotifyCache: { token: string; expiresAt: number } | null = null;
@@ -204,25 +197,6 @@ async function searchSpotify(query: string, limit: number): Promise<SongSearchHi
   return hits;
 }
 
-async function searchYoutube(title: string, artist: string): Promise<string | undefined> {
-  const apiKey = process.env.YOUTUBE_API_KEY?.trim();
-  if (!apiKey) return undefined;
-
-  const q = `${title} ${artist} karaoke`;
-  const url = new URL("https://www.googleapis.com/youtube/v3/search");
-  url.searchParams.set("part", "snippet");
-  url.searchParams.set("type", "video");
-  url.searchParams.set("maxResults", "1");
-  url.searchParams.set("q", q);
-  url.searchParams.set("key", apiKey);
-
-  const res = await fetch(url.toString(), { cache: "no-store" });
-  if (!res.ok) return undefined;
-  const data = (await res.json()) as YoutubeSearchResponse;
-  const videoId = data.items?.[0]?.id?.videoId;
-  return videoId ? `https://www.youtube.com/watch?v=${videoId}` : undefined;
-}
-
 function mergeHits(primary: SongSearchHit[], secondary: SongSearchHit[]): SongSearchHit[] {
   const seen = new Set<string>();
   const out: SongSearchHit[] = [];
@@ -271,7 +245,7 @@ function withFindLinks(hit: SongSearchHit): SongSearchHit {
  * Apple iTunes (US + HK) always runs — no key.
  * Every hit gets author, a language guess when possible, and YouTube / Spotify
  * search-page links so guests can tap through without API keys.
- * Optional YOUTUBE_API_KEY / Spotify client keys upgrade those to exact URLs.
+ * YouTube Data API is not used here — Find link is an explicit, quota-costly tap.
  */
 export async function searchSongs(query: string, limit = 8): Promise<SongSearchHit[]> {
   const q = query.trim();
@@ -282,14 +256,5 @@ export async function searchSongs(query: string, limit = 8): Promise<SongSearchH
     searchSpotify(q, limit),
   ]);
 
-  let hits = mergeHits(itunes, spotify).slice(0, limit).map(withFindLinks);
-
-  if (hits[0] && process.env.YOUTUBE_API_KEY?.trim()) {
-    const youtubeUrl = await searchYoutube(hits[0].title, hits[0].artist);
-    if (youtubeUrl) {
-      hits = hits.map((hit, index) => (index === 0 ? { ...hit, url: youtubeUrl } : hit));
-    }
-  }
-
-  return hits;
+  return mergeHits(itunes, spotify).slice(0, limit).map(withFindLinks);
 }

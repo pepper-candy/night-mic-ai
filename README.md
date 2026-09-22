@@ -12,18 +12,20 @@ Built with Next.js (App Router), TypeScript, and Tailwind. Designed for phones f
 
 1. **Host** taps **Host this night**. Night Mic mints a shoutable code like `VIBE 42` and a host session on that device.
 2. Guests open the share link (`/room/VIBE42`) or type the code on the home page / `/join`.
-3. Each guest picks a nickname and can add a song with just a **title**. Search suggests matches and fills **artist** (and language when we can tell). **Find song link** opens Spotify search so they can paste a track URL. Language, a message to the audience, and the link live under **More**.
-4. Hosts can **pause** guest song intake or schedule when the queue opens. The add-song panel greys out until then. Hosts can still add songs.
-5. Hosts can publish an **invitation** (`/invite/CODE`) with title, description, location, and start time — guests see a live countdown on the invite and after they join, until the event starts.
-6. Optional **link validation**: host turns it on and shares a **cohost link**. That second device embeds YouTube/Spotify previews, and host/cohost can edit any queued song (cards show a green **Verified** tag next to the language).
-7. Everyone in the room sees the same live queue. The host can:
+3. Each guest picks a nickname and can add a song with just a **title**. Title search uses Apple Music (free, no YouTube quota) and fills **artist** (and language when we can tell). After title/artist look right, **Find link** spends YouTube quota once, shows up to 5 karaoke videos one at a time (Yes / Next / Back), and fills the watch URL. Paste a URL still works. Language, a message to the audience, and the link live under **More**.
+4. On the host screen, **Play / Pause / Skip** drive an embedded YouTube player for the current song. When the video ends, the queue advances to the next singer.
+5. Hosts can **pause** guest song intake or schedule when the queue opens. The add-song panel greys out until then. Hosts can still add songs.
+6. Hosts can publish an **invitation** (`/invite/CODE`) with title, description, location, and start time — guests see a live countdown on the invite and after they join, until the event starts.
+7. Optional **link validation**: host turns it on and shares a **cohost link**. That second device embeds YouTube/Spotify previews, and host/cohost can edit any queued song (cards show a green **Verified** tag next to the language).
+8. Everyone in the room sees the same live queue. The host can:
    - promote a song to **now playing**
-   - skip (marks current done and starts the next one)
+   - play / pause the embedded YouTube player
+   - skip (marks current done and starts the next one; also happens when the video ends)
    - move waiting songs up or down
    - edit or remove a song
    - clear finished songs
    - seed three karaoke classics so the night starts in under a minute
-8. Guests can cancel **their own** waiting song. They cannot reorder or touch anyone else’s.
+9. Guests can cancel **their own** waiting song. They cannot reorder or touch anyone else’s.
 
 Rooms go idle after **24 hours** without updates and then disappear.
 
@@ -50,12 +52,31 @@ Copy `.env.example` to `.env.local` if you want Redis locally.
 | `UPSTASH_REDIS_REST_TOKEN` | On Vercel | Upstash Redis REST token |
 | `KV_REST_API_URL` | Alternative | Vercel KV REST URL (same protocol) |
 | `KV_REST_API_TOKEN` | Alternative | Vercel KV REST token |
-| `YOUTUBE_API_KEY` | Optional | YouTube Data API v3 — upgrade the top hit from a karaoke search page to an exact watch URL |
+| `YOUTUBE_API_KEY` | Optional | YouTube Data API v3 — **Find link** on add/edit song (server-only) and host embed. Without it, guests can still paste a YouTube URL. |
 | `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` | Optional | Spotify Client Credentials — upgrade search-page links to exact track URLs |
 
 Either the Upstash pair **or** the Vercel KV pair is enough. If both are set, Upstash wins.
 
-Song search **always** works without keys: Apple’s free iTunes Search API (US + HK) fills title + artist, a language guess when the script/storefront is clear, and YouTube / Spotify **search pages** (`youtube.com/results`, `open.spotify.com/search`) so anyone can tap through. The optional keys above only swap those for exact video/track links (useful for embeds).
+Title/artist catalog search **always** works without keys and **never** calls YouTube: Apple’s free iTunes Search API (US + HK) fills title + artist and a language guess. **Find link** is an explicit tap and needs `YOUTUBE_API_KEY`. Paste-a-URL remains the fallback.
+
+### YouTube Data API v3 (`YOUTUBE_API_KEY`)
+
+Used only on the server (`/api/youtube/search`). The key is never sent to the browser. Typing a title does **not** hit YouTube.
+
+1. Open [Google Cloud Console](https://console.cloud.google.com/).
+2. Create or select a project.
+3. **APIs & Services → Library** → enable **YouTube Data API v3**.
+4. **APIs & Services → Credentials → Create credentials → API key**.
+5. Restrict the key to YouTube Data API v3 if you can.
+6. Local: set `YOUTUBE_API_KEY` in `.env.local`.
+7. Production: add the same variable in the [Vercel project environment](https://vercel.com/docs/projects/environment-variables) and redeploy.
+
+**Find link** (after title/artist are set) does:
+
+1. `search.list` — `q="{title} {artist} karaoke"`, `type=video`, `maxResults=5` (**100** quota units)
+2. `videos.list` — those 5 ids, `part=contentDetails,snippet` for duration (**~1** unit)
+
+Default daily quota is **10,000** units ⇒ about **100 Find link taps/day**. The UI never searches on keystroke. A second Find link is allowed but warned. Missing key and `quotaExceeded` show a clear message; guests can still paste a watch URL.
 
 **Persistence modes**
 
@@ -91,7 +112,7 @@ Origin and Vercel both speak git. Origin holds the source of truth for this work
 - Near-real-time sync via 1.5s polling (works on Vercel serverless; no long-lived socket server)
 - `@upstash/redis` when credentials are present
 
-Song entry is free text with optional catalog search (iTunes always; YouTube/Spotify search pages always; exact streaming IDs when optional keys are set).
+Song entry is free text with optional catalog search (iTunes, no YouTube quota) plus an explicit **Find link** when `YOUTUBE_API_KEY` is set. Paste-URL still works. The host booth plays the current queue item in an embedded YouTube IFrame player (play, pause, skip, auto-advance).
 
 ## Hardening later (not in this MVP)
 
