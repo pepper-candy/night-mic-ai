@@ -2,17 +2,14 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { setQueueGate } from "@/lib/api-client";
-import {
-  formatEventWhen,
-  resolveEventTimezone,
-  toDatetimeLocalInZone,
-} from "@/lib/event-time";
+import { resolveEventTimezone, toDatetimeLocalInZone } from "@/lib/event-time";
 import { isQueueAccepting } from "@/lib/queue-gate";
 import type { PublicRoom } from "@/lib/types";
+import { CheckIcon } from "lucide-react";
 
 export function QueueGatePanel({
   code,
@@ -39,13 +36,7 @@ export function QueueGatePanel({
         timezone,
       });
       onUpdated(next);
-      toast.success(
-        open
-          ? "Queue is open — guests can add songs."
-          : scheduled
-            ? "Queue is paused until that time."
-            : "Queue is paused — guests cannot add songs.",
-      );
+      toast.success(open ? "LIVE" : scheduled ? "Opens after that date." : "Paused");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not update the queue.");
     } finally {
@@ -55,62 +46,54 @@ export function QueueGatePanel({
 
   return (
     <section className="glow-panel space-y-3 p-4">
-      <div>
-        <p className="text-[11px] uppercase tracking-[0.28em] text-cyan">Queue</p>
+      <div className="flex flex-wrap items-center gap-2">
         <h2 className="font-display text-2xl tracking-wide">When guests can add songs</h2>
+        {accepting ? (
+          <Badge variant="secondary" className="bg-emerald-500/15 text-emerald-400">
+            LIVE
+          </Badge>
+        ) : (
+          <Badge variant="secondary" className="bg-secondary text-muted-foreground">
+            OFF
+          </Badge>
+        )}
       </div>
 
-      <div
-        className={`rounded-xl px-4 py-3 ${
-          accepting
-            ? "border border-emerald-400/40 bg-emerald-500/15"
-            : "border border-gold/40 bg-gold/10"
-        }`}
-      >
-        <p
-          className={`text-[11px] font-semibold uppercase tracking-[0.22em] ${
-            accepting ? "text-emerald-400" : "text-gold"
-          }`}
-        >
-          {accepting ? "Open" : "Paused"}
-        </p>
-        <p className="mt-1 text-sm text-foreground">
-          {accepting
-            ? "Guests can add songs right now. (This is the default.)"
-            : room.queueOpensAt
-              ? `Guests cannot add songs until ${formatEventWhen(room.queueOpensAt, timezone)}.`
-              : "Guests cannot add songs until you open the queue."}
-        </p>
-      </div>
-
-      <Button
-        type="button"
-        disabled={pending}
-        className={`h-12 w-full ${accepting ? "" : "neon-button"}`}
-        variant={accepting ? "outline" : "default"}
-        onClick={() => void save(!accepting, false)}
-      >
-        {pending ? "Saving…" : accepting ? "Pause queue" : "Open queue"}
-      </Button>
-
-      <div className="space-y-1.5">
-        <Label htmlFor="queue-opens">Or pause until this time</Label>
-        <Input
-          id="queue-opens"
-          type="datetime-local"
-          value={opensAt}
-          onChange={(event) => setOpensAt(event.target.value)}
-          className="h-12 text-base"
-        />
+      <div className="flex items-stretch gap-2">
         <Button
           type="button"
-          variant="ghost"
-          disabled={pending || !opensAt}
-          className="h-11 w-full"
-          onClick={() => void save(false, true)}
+          disabled={pending}
+          variant={accepting ? "outline" : "default"}
+          className={`h-12 shrink-0 px-5 ${accepting ? "" : "neon-button"}`}
+          onClick={() => void save(!accepting, false)}
         >
-          Pause until then
+          {pending ? "…" : accepting ? "Pause" : "On"}
         </Button>
+
+        <div className="flex min-w-0 flex-1 items-center gap-2 rounded-lg border border-input bg-transparent px-2 dark:bg-input/30">
+          <span className="hidden shrink-0 text-xs text-muted-foreground sm:inline">
+            After this date
+          </span>
+          <Input
+            id="queue-opens"
+            type="datetime-local"
+            value={opensAt}
+            onChange={(event) => setOpensAt(event.target.value)}
+            aria-label="After this date"
+            className="h-11 min-w-0 flex-1 border-0 bg-transparent px-1 shadow-none focus-visible:ring-0 dark:bg-transparent"
+          />
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="size-11 shrink-0"
+            disabled={pending || !opensAt}
+            aria-label="Update open date"
+            onClick={() => void save(false, true)}
+          >
+            <CheckIcon className="size-5 text-emerald-400" />
+          </Button>
+        </div>
       </div>
     </section>
   );
