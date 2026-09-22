@@ -1,9 +1,10 @@
-import { readHostToken } from "@/lib/host-token";
+import { readStaffToken } from "@/lib/host-token";
 import {
   errorResponse,
   guestCancel,
   hostPlay,
-  hostRemove,
+  staffEditSong,
+  staffRemove,
 } from "@/lib/rooms";
 
 export const dynamic = "force-dynamic";
@@ -16,13 +17,25 @@ export async function PATCH(
     const { code, id } = await context.params;
     const body = (await request.json()) as Record<string, unknown>;
     const action = typeof body.action === "string" ? body.action : "";
-    const token = await readHostToken(code, request);
+    const token = await readStaffToken(code, request);
 
     if (action === "play") {
       return Response.json(await hostPlay(code, token, id));
     }
     if (action === "remove") {
-      return Response.json(await hostRemove(code, token, id));
+      return Response.json(await staffRemove(code, token, id));
+    }
+    if (action === "edit") {
+      return Response.json(
+        await staffEditSong(code, token, id, {
+          title: body.title,
+          artist: body.artist,
+          url: body.url,
+          spotifyUrl: body.spotifyUrl,
+          language: body.language,
+          languageOther: body.languageOther,
+        }),
+      );
     }
     if (action === "cancel") {
       return Response.json(await guestCancel(code, id, body.guestId));
@@ -39,9 +52,9 @@ export async function DELETE(
 ) {
   try {
     const { code, id } = await context.params;
-    const token = await readHostToken(code, request);
+    const token = await readStaffToken(code, request);
     if (token) {
-      return Response.json(await hostRemove(code, token, id));
+      return Response.json(await staffRemove(code, token, id));
     }
     const url = new URL(request.url);
     const guestId = url.searchParams.get("guestId");

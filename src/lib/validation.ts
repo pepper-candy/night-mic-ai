@@ -1,8 +1,14 @@
 import {
   MAX_ARTIST,
+  MAX_EVENT_DESCRIPTION,
+  MAX_EVENT_LOCATION,
+  MAX_EVENT_TITLE,
+  MAX_LANGUAGE_OTHER,
   MAX_NAME,
   MAX_TITLE,
   MAX_URL,
+  type EventInfo,
+  type SongLanguage,
 } from "@/lib/types";
 
 export function trim(value: unknown): string {
@@ -50,4 +56,65 @@ export function validateGuestId(value: unknown): string {
   const id = trim(value);
   if (id.length < 8 || id.length > 80) throw new Error("Guest session looks invalid. Refresh and try again.");
   return id;
+}
+
+export function validateLanguage(
+  language: unknown,
+  languageOther: unknown,
+): { language: SongLanguage; languageOther?: string } {
+  const lang = trim(language).toLowerCase();
+  if (lang === "cantonese" || lang === "english") {
+    return { language: lang };
+  }
+  if (lang === "other") {
+    const other = trim(languageOther);
+    if (other.length < 1) throw new Error("Say which language — e.g. Mandarin, Japanese, Korean.");
+    if (other.length > MAX_LANGUAGE_OTHER) {
+      throw new Error(`Keep the language note under ${MAX_LANGUAGE_OTHER} characters.`);
+    }
+    return { language: "other", languageOther: other };
+  }
+  throw new Error("Pick Cantonese, English, or Other languages.");
+}
+
+export function validateEventInput(input: {
+  title: unknown;
+  description: unknown;
+  location: unknown;
+  startsAt: unknown;
+}): EventInfo {
+  const title = trim(input.title);
+  const description = trim(input.description);
+  const location = trim(input.location);
+
+  if (title.length < 1) throw new Error("Give the event a title.");
+  if (title.length > MAX_EVENT_TITLE) {
+    throw new Error(`Event titles max out at ${MAX_EVENT_TITLE} characters.`);
+  }
+  if (description.length > MAX_EVENT_DESCRIPTION) {
+    throw new Error(`Keep the description under ${MAX_EVENT_DESCRIPTION} characters.`);
+  }
+  if (location.length > MAX_EVENT_LOCATION) {
+    throw new Error(`Keep the location under ${MAX_EVENT_LOCATION} characters.`);
+  }
+
+  let startsAt: number;
+  if (typeof input.startsAt === "number") {
+    startsAt = input.startsAt;
+  } else if (typeof input.startsAt === "string" && input.startsAt.trim()) {
+    startsAt = Date.parse(input.startsAt);
+  } else {
+    throw new Error("Set a start date and time for the event.");
+  }
+
+  if (!Number.isFinite(startsAt)) {
+    throw new Error("That start time does not look valid.");
+  }
+
+  return {
+    title,
+    description,
+    location,
+    startsAt,
+  };
 }

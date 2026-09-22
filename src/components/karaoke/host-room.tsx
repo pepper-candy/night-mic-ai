@@ -5,15 +5,18 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AddSongForm } from "@/components/karaoke/add-song-form";
 import { AppShell, BrandMark } from "@/components/karaoke/app-shell";
+import { EditSongDialog } from "@/components/karaoke/edit-song-dialog";
+import { EventSettingsPanel } from "@/components/karaoke/event-settings-panel";
 import { NowPlaying } from "@/components/karaoke/now-playing";
 import { SharePanel } from "@/components/karaoke/share-panel";
 import { SongRow } from "@/components/karaoke/song-row";
 import { EmptyQueue, ErrorState, LoadingState, LockedHost } from "@/components/karaoke/states";
+import { ValidationSettingsPanel } from "@/components/karaoke/validation-settings-panel";
 import { Button } from "@/components/ui/button";
 import { saveDisplayName, saveHostToken, useHasHydrated, useHostToken } from "@/hooks/use-identity";
 import { useRoom } from "@/hooks/use-room";
 import { queueAction, songAction } from "@/lib/api-client";
-import type { PublicRoom } from "@/lib/types";
+import type { PublicRoom, QueueItem } from "@/lib/types";
 
 export function HostRoom({
   code,
@@ -28,6 +31,8 @@ export function HostRoom({
   const hostToken = hostTokenFromUrl || storedToken || undefined;
   const authorized = Boolean(hostToken);
   const [showAdd, setShowAdd] = useState(false);
+  const [editing, setEditing] = useState<QueueItem | null>(null);
+  const [cohostToken, setCohostToken] = useState<string | undefined>();
 
   useEffect(() => {
     if (hostTokenFromUrl) {
@@ -116,7 +121,20 @@ export function HostRoom({
         </p>
       ) : null}
 
-      <SharePanel code={code} hostToken={hostToken} />
+      <SharePanel code={code} hostToken={hostToken} hasEvent={Boolean(room.event)} />
+
+      <div className="mt-4 space-y-4">
+        <EventSettingsPanel code={code} event={room.event} onUpdated={apply} />
+        <ValidationSettingsPanel
+          code={code}
+          enabled={room.validationEnabled}
+          cohostToken={cohostToken}
+          onUpdated={(next, token) => {
+            apply(next);
+            if (token) setCohostToken(token);
+          }}
+        />
+      </div>
 
       <div className="mt-4">
         <NowPlaying
@@ -163,10 +181,12 @@ export function HostRoom({
               song={song}
               index={index + 1}
               isHost
+              isStaff
               canMoveUp={index > 0}
               canMoveDown={index < room.upNext.length - 1}
               onPlay={() => void run(() => songAction(code, song.id, "play"), "They're up.")}
               onRemove={() => void run(() => songAction(code, song.id, "remove"))}
+              onEdit={() => setEditing(song)}
               onMove={(direction) =>
                 void run(() => queueAction(code, "move", { id: song.id, direction }))
               }
@@ -204,14 +224,26 @@ export function HostRoom({
               key={song.id}
               song={song}
               isHost
+              isStaff
               onRemove={() => void run(() => songAction(code, song.id, "remove"))}
               onPlay={() => void run(() => songAction(code, song.id, "play"), "Encore.")}
+              onEdit={() => setEditing(song)}
             />
           ))}
         </section>
       ) : (
         <div className="h-6" />
       )}
+
+      <EditSongDialog
+        code={code}
+        song={editing}
+        open={Boolean(editing)}
+        onOpenChange={(open) => {
+          if (!open) setEditing(null);
+        }}
+        onSaved={apply}
+      />
     </AppShell>
   );
 }

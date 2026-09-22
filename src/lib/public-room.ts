@@ -1,9 +1,17 @@
-import type { Persistence, PublicRoom, Room } from "@/lib/types";
+import type { Persistence, PublicRoom, QueueItem, Room } from "@/lib/types";
+
+function normalizeSong(item: QueueItem): QueueItem {
+  return {
+    ...item,
+    language: item.language || "english",
+  };
+}
 
 export function toPublicRoom(room: Room, persistence: Persistence): PublicRoom {
-  const nowPlaying = room.queue.find((item) => item.status === "playing") ?? null;
-  const upNext = room.queue.filter((item) => item.status === "queued");
-  const done = room.queue
+  const queue = room.queue.map(normalizeSong);
+  const nowPlaying = queue.find((item) => item.status === "playing") ?? null;
+  const upNext = queue.filter((item) => item.status === "queued");
+  const done = queue
     .filter((item) => item.status === "done")
     .slice()
     .reverse();
@@ -13,10 +21,13 @@ export function toPublicRoom(room: Room, persistence: Persistence): PublicRoom {
     createdAt: room.createdAt,
     updatedAt: room.updatedAt,
     version: room.version,
-    queue: room.queue,
+    queue,
     nowPlaying,
     upNext,
     done,
     persistence,
+    event: room.event,
+    validationEnabled: Boolean(room.validationEnabled),
+    hasCohost: Boolean(room.cohostToken),
   };
 }

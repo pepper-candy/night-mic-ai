@@ -1,6 +1,8 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { languageLabel } from "@/lib/media";
 import { timeAgo } from "@/lib/time";
 import type { QueueItem } from "@/lib/types";
 import { ExternalLinkIcon, SkipForwardIcon } from "lucide-react";
@@ -26,22 +28,44 @@ export function NowPlaying({
     );
   }
 
+  const lang = languageLabel(song.language || "english", song.languageOther);
+
   return (
     <section className="now-playing px-5 py-6">
       <p className="text-[11px] uppercase tracking-[0.28em] text-gold">Now singing</p>
-      <h2 className="mt-2 font-display text-4xl leading-none tracking-wide sm:text-5xl">
-        {song.title}
-      </h2>
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <h2 className="font-display text-4xl leading-none tracking-wide sm:text-5xl">
+          {song.title}
+        </h2>
+        <Badge variant="secondary" className="bg-gold/20 text-gold">
+          {lang}
+        </Badge>
+      </div>
       <p className="mt-2 text-lg text-primary-foreground/85">{song.artist}</p>
       <p className="mt-2 text-sm text-muted-foreground">
         {song.submittedBy}
+        {song.modified ? " (modified)" : ""}
         {song.startedAt ? ` · started ${timeAgo(song.startedAt)}` : ""}
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
         {song.url ? (
-          <Button variant="outline" className="h-12 flex-1" render={<a href={song.url} target="_blank" rel="noreferrer" />}>
+          <Button
+            variant="outline"
+            className="h-12 flex-1"
+            render={<a href={song.url} target="_blank" rel="noreferrer" />}
+          >
             <ExternalLinkIcon data-icon="inline-start" />
             Open track
+          </Button>
+        ) : null}
+        {song.spotifyUrl ? (
+          <Button
+            variant="outline"
+            className="h-12 flex-1"
+            render={<a href={song.spotifyUrl} target="_blank" rel="noreferrer" />}
+          >
+            <ExternalLinkIcon data-icon="inline-start" />
+            Spotify
           </Button>
         ) : null}
         {isHost && onSkip ? (

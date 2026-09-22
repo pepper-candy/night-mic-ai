@@ -3,8 +3,10 @@ import { CLASSIC_TRACKS, HOUSE_DJ } from "@/lib/demo";
 import {
   MAX_SONGS_PER_GUEST,
   MAX_SONGS_PER_ROOM,
+  type EventInfo,
   type QueueItem,
   type Room,
+  type SongLanguage,
 } from "@/lib/types";
 
 export class RoomError extends Error {
@@ -30,6 +32,9 @@ export function addSongToRoom(
     title: string;
     artist: string;
     url?: string;
+    spotifyUrl?: string;
+    language: SongLanguage;
+    languageOther?: string;
     submittedBy: string;
     submitterId: string;
   },
@@ -48,6 +53,9 @@ export function addSongToRoom(
     title: input.title,
     artist: input.artist,
     url: input.url,
+    spotifyUrl: input.spotifyUrl,
+    language: input.language,
+    languageOther: input.languageOther,
     submittedBy: input.submittedBy,
     submitterId: input.submitterId,
     status: "queued",
@@ -72,6 +80,7 @@ export function seedClassics(room: Room): Room {
     next = addSongToRoom(next, {
       title: track.title,
       artist: track.artist,
+      language: "english",
       submittedBy: HOUSE_DJ.name,
       submitterId: HOUSE_DJ.id,
     });
@@ -144,6 +153,39 @@ export function cancelOwnSong(room: Room, id: string, guestId: string): Room {
   return removeSong(room, id);
 }
 
+export function editSongInRoom(
+  room: Room,
+  id: string,
+  patch: {
+    title: string;
+    artist: string;
+    url?: string;
+    spotifyUrl?: string;
+    language: SongLanguage;
+    languageOther?: string;
+  },
+): Room {
+  const exists = room.queue.some((item) => item.id === id);
+  if (!exists) throw new RoomError("Song not found.", 404);
+
+  return bump({
+    ...room,
+    queue: room.queue.map((item) => {
+      if (item.id !== id) return item;
+      return {
+        ...item,
+        title: patch.title,
+        artist: patch.artist,
+        url: patch.url,
+        spotifyUrl: patch.spotifyUrl,
+        language: patch.language,
+        languageOther: patch.language === "other" ? patch.languageOther : undefined,
+        modified: true,
+      };
+    }),
+  });
+}
+
 export function moveQueued(room: Room, id: string, direction: "up" | "down"): Room {
   const queued = room.queue.filter((item) => item.status === "queued");
   const index = queued.findIndex((item) => item.id === id);
@@ -179,7 +221,11 @@ export function reorderQueued(room: Room, ids: string[]): Room {
 
   return bump({
     ...room,
-    queue: [...others.filter((item) => item.status === "playing"), ...reordered, ...others.filter((item) => item.status === "done")],
+    queue: [
+      ...others.filter((item) => item.status === "playing"),
+      ...reordered,
+      ...others.filter((item) => item.status === "done"),
+    ],
   });
 }
 
@@ -189,4 +235,26 @@ export function clearCompleted(room: Room): Room {
     throw new RoomError("No finished songs to clear.");
   }
   return bump({ ...room, queue: remaining });
+}
+
+export function setRoomEvent(room: Room, event: EventInfo | undefined): Room {
+  return bump({
+    ...room,
+    event,
+  });
+}
+
+export function setValidationMode(room: Room, enabled: boolean): Room {
+  if (enabled) {
+    return bump({
+      ...room,
+      validationEnabled: true,
+      cohostToken: room.cohostToken || nanoid(24),
+    });
+  }
+  return bump({
+    ...room,
+    validationEnabled: false,
+    // Keep the token so turning validation back on reuses the same cohost link.
+  });
 }

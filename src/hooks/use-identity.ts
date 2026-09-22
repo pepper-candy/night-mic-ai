@@ -2,9 +2,12 @@
 
 import { useSyncExternalStore } from "react";
 import {
+  getCohostToken,
   getDisplayName,
   getGuestId,
   getHostToken,
+  getStaffToken,
+  setCohostToken as persistCohostToken,
   setDisplayName as persistDisplayName,
   setHostToken as persistHostToken,
 } from "@/lib/identity";
@@ -48,6 +51,22 @@ export function useHostToken(code: string) {
   );
 }
 
+export function useCohostToken(code: string) {
+  return useSyncExternalStore(
+    subscribe,
+    () => getCohostToken(code) ?? "",
+    () => "",
+  );
+}
+
+export function useStaffToken(code: string) {
+  return useSyncExternalStore(
+    subscribe,
+    () => getStaffToken(code) ?? "",
+    () => "",
+  );
+}
+
 export function saveDisplayName(name: string) {
   persistDisplayName(name);
   emitIdentityChange();
@@ -55,5 +74,10 @@ export function saveDisplayName(name: string) {
 
 export function saveHostToken(code: string, token: string) {
   persistHostToken(code, token);
+  emitIdentityChange();
+}
+
+export function saveCohostToken(code: string, token: string) {
+  persistCohostToken(code, token);
   emitIdentityChange();
 }
