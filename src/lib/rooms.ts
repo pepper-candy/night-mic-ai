@@ -67,6 +67,7 @@ export async function createRoom(): Promise<{ room: Room; response: CreateRoomRe
       version: 1,
       queue: [],
       validationEnabled: false,
+      queueOpen: true,
     };
     await saveRoom(room);
     return {

@@ -39,9 +39,15 @@ export function QueueGatePanel({
         timezone,
       });
       onUpdated(next);
-      toast.success(open ? "Guests can add songs." : scheduled ? "Queue will open at that time." : "New songs are paused.");
+      toast.success(
+        open
+          ? "Queue is open — guests can add songs."
+          : scheduled
+            ? "Queue is paused until that time."
+            : "Queue is paused — guests cannot add songs.",
+      );
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not update the queue gate.");
+      toast.error(error instanceof Error ? error.message : "Could not update the queue.");
     } finally {
       setPending(false);
     }
@@ -52,35 +58,43 @@ export function QueueGatePanel({
       <div>
         <p className="text-[11px] uppercase tracking-[0.28em] text-cyan">Queue</p>
         <h2 className="font-display text-2xl tracking-wide">When guests can add songs</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
+      </div>
+
+      <div
+        className={`rounded-xl px-4 py-3 ${
+          accepting
+            ? "border border-emerald-400/40 bg-emerald-500/15"
+            : "border border-gold/40 bg-gold/10"
+        }`}
+      >
+        <p
+          className={`text-[11px] font-semibold uppercase tracking-[0.22em] ${
+            accepting ? "text-emerald-400" : "text-gold"
+          }`}
+        >
+          {accepting ? "Open" : "Paused"}
+        </p>
+        <p className="mt-1 text-sm text-foreground">
           {accepting
-            ? "The queue is open."
+            ? "Guests can add songs right now. (This is the default.)"
             : room.queueOpensAt
-              ? `Paused until ${formatEventWhen(room.queueOpensAt, timezone)}.`
-              : "Paused. Guests can’t add songs until you open it."}
+              ? `Guests cannot add songs until ${formatEventWhen(room.queueOpensAt, timezone)}.`
+              : "Guests cannot add songs until you open the queue."}
         </p>
       </div>
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <Button
-          type="button"
-          disabled={pending}
-          className="h-12 flex-1 neon-button"
-          onClick={() => void save(true, false)}
-        >
-          Open now
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          disabled={pending}
-          className="h-12 flex-1"
-          onClick={() => void save(false, false)}
-        >
-          Pause
-        </Button>
-      </div>
+
+      <Button
+        type="button"
+        disabled={pending}
+        className={`h-12 w-full ${accepting ? "" : "neon-button"}`}
+        variant={accepting ? "outline" : "default"}
+        onClick={() => void save(!accepting, false)}
+      >
+        {pending ? "Saving…" : accepting ? "Pause queue" : "Open queue"}
+      </Button>
+
       <div className="space-y-1.5">
-        <Label htmlFor="queue-opens">Or open automatically at</Label>
+        <Label htmlFor="queue-opens">Or pause until this time</Label>
         <Input
           id="queue-opens"
           type="datetime-local"
@@ -90,12 +104,12 @@ export function QueueGatePanel({
         />
         <Button
           type="button"
-          variant="outline"
+          variant="ghost"
           disabled={pending || !opensAt}
           className="h-11 w-full"
           onClick={() => void save(false, true)}
         >
-          Schedule open
+          Pause until then
         </Button>
       </div>
     </section>
