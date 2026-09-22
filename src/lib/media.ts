@@ -47,6 +47,24 @@ export function languageLabel(language: string, languageOther?: string): string 
   return language;
 }
 
+/** Google lyrics search — Cantonese uses 歌詞, everything else uses Lyrics. */
+export function lyricsSearchQuery(title: string, language?: string): string {
+  const name = title.trim();
+  if ((language || "english") === "cantonese") {
+    return `${name} 歌詞`;
+  }
+  return `${name} Lyrics`;
+}
+
+export function lyricsSearchUrl(title: string, language?: string): string {
+  const q = lyricsSearchQuery(title, language);
+  return `https://www.google.com/search?q=${encodeURIComponent(q)}`;
+}
+
+export function lyricsSearchButtonLabel(title: string, language?: string): string {
+  return `🔍${lyricsSearchQuery(title, language)}`;
+}
+
 /** Format a Date for <input type="datetime-local" /> in local timezone. */
 export function toDatetimeLocalValue(ms: number): string {
   const d = new Date(ms);

@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { languageLabel } from "@/lib/media";
+import { languageLabel, lyricsSearchButtonLabel, lyricsSearchUrl } from "@/lib/media";
 import { timeAgo } from "@/lib/time";
 import type { QueueItem } from "@/lib/types";
 import {
@@ -84,6 +84,15 @@ export function SongRow({
                 {timeAgo(song.createdAt)}
               </p>
               <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1">
+                <a
+                  href={lyricsSearchUrl(song.title, song.language)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex max-w-full items-center gap-1 truncate text-sm text-gold underline-offset-4 hover:underline"
+                  title="Search lyrics on Google"
+                >
+                  {lyricsSearchButtonLabel(song.title, song.language)}
+                </a>
                 {song.url ? (
                   <a
                     href={song.url}
