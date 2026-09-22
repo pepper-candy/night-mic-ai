@@ -138,6 +138,7 @@ export function HostRoom({
           song={room.nowPlaying}
           isHost
           showLyrics={false}
+          showEmbed
           onSkip={() => void run(() => queueAction(code, "skip"), "Next singer, you're up.")}
         />
       </div>

@@ -274,7 +274,7 @@ export function AddSongForm({
       ) : null}
 
       <div className="space-y-1.5">
-          <Label htmlFor="song-url">YouTube / karaoke (optional — filled from search)</Label>
+          <Label htmlFor="song-url">YouTube (optional — filled from search)</Label>
         <Input
           id="song-url"
           type="url"

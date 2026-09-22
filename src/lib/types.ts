@@ -20,7 +20,7 @@ export interface QueueItem {
   createdAt: number;
   startedAt?: number;
   completedAt?: number;
-  /** Set when host/cohost edits a guest-submitted (or any) song. */
+  /** Set when host/cohost edits a song; shown as a Verified badge. */
   modified?: boolean;
 }
 

@@ -15,7 +15,7 @@ Built with Next.js (App Router), TypeScript, and Tailwind. Designed for phones f
 3. Each guest picks a display name and submits a song: **title + artist + language category required**, optional YouTube/karaoke and Spotify URLs. Language is **Cantonese**, **English**, or **Other** (with a short note) so the night stays mixed.
 4. Guests can **search as they type** in the title field (magnifier runs a full search). Picking a match autofills a clean title, **artist**, a **language guess** when possible (Cantonese / English / Korean / Japanese / Mandarin), and **YouTube karaoke + Spotify search-page links** so people can tap and find the song — no API keys required.
 5. Hosts can publish an **invitation** (`/invite/CODE`) with title, brief description, location, and start time — guests see a live countdown before joining the queue.
-6. Optional **link validation**: host turns it on and shares a **cohost link**. That second device embeds YouTube/Spotify previews, and host/cohost can edit any queued song (cards show `(modified)` after the requester’s name).
+6. Optional **link validation**: host turns it on and shares a **cohost link**. That second device embeds YouTube/Spotify previews, and host/cohost can edit any queued song (cards show a green **Verified** tag next to the language).
 7. Everyone in the room sees the same live queue. The host can:
    - promote a song to **now playing**
    - skip (marks current done and starts the next one)
