@@ -77,7 +77,7 @@ export function YoutubeSearchPicker({
         onClick={() => void findLink()}
       >
         <SearchIcon data-icon="inline-start" />
-        {searching ? "Finding link…" : finds > 0 ? "Find link again" : "Find link"}
+        {searching ? "Finding on YouTube…" : finds > 0 ? "Find on YouTube again" : "Find on YouTube"}
       </Button>
       {onFindSpotify ? (
         <button
@@ -85,7 +85,7 @@ export function YoutubeSearchPicker({
           className="block w-full text-center text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
           onClick={onFindSpotify}
         >
-          Or find on Spotify
+          or Find Link on Spotify
         </button>
       ) : null}
 
@@ -160,7 +160,7 @@ export function YoutubeSearchPicker({
 
           {index >= results.length - 1 ? (
             <p className="text-xs text-muted-foreground">
-              None of these? Paste a YouTube URL below, or tap Find link again.
+              None of these? Paste a YouTube URL below, or tap Find on YouTube again.
             </p>
           ) : (
             <p className="text-xs text-muted-foreground">
