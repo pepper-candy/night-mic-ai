@@ -13,7 +13,8 @@ import {
   resolveEventTimezone,
   toDatetimeLocalInZone,
 } from "@/lib/event-time";
-import type { EventInfo, PublicRoom } from "@/lib/types";
+import { MAX_EVENT_DESCRIPTION, type EventInfo, type PublicRoom } from "@/lib/types";
+import { stripDescriptionNewlines } from "@/lib/validation";
 
 function EventForm({
   code,
@@ -27,7 +28,9 @@ function EventForm({
   onBusy: (pending: boolean) => void;
 }) {
   const [title, setTitle] = useState(event?.title ?? "");
-  const [description, setDescription] = useState(event?.description ?? "");
+  const [description, setDescription] = useState(() =>
+    stripDescriptionNewlines(event?.description ?? "").slice(0, MAX_EVENT_DESCRIPTION),
+  );
   const [location, setLocation] = useState(event?.location ?? "");
   const [timezone, setTimezone] = useState(resolveEventTimezone(event?.timezone));
   const [startsAt, setStartsAt] = useState(
@@ -42,7 +45,7 @@ function EventForm({
     try {
       const room = await updateEvent(code, {
         title,
-        description,
+        description: stripDescriptionNewlines(description).slice(0, MAX_EVENT_DESCRIPTION),
         location,
         startsAt,
         timezone,
@@ -93,15 +96,32 @@ function EventForm({
         />
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="event-description">Brief description</Label>
-        <textarea
+        <div className="flex items-baseline justify-between gap-3">
+          <Label htmlFor="event-description">Brief description</Label>
+          <span
+            className={`text-xs tabular-nums ${
+              description.length >= MAX_EVENT_DESCRIPTION ? "text-gold" : "text-muted-foreground"
+            }`}
+          >
+            {description.length}/{MAX_EVENT_DESCRIPTION}
+          </span>
+        </div>
+        <Input
           id="event-description"
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={(e) =>
+            setDescription(stripDescriptionNewlines(e.target.value).slice(0, MAX_EVENT_DESCRIPTION))
+          }
+          onKeyDown={(e) => {
+            if (e.key === "Enter") e.preventDefault();
+          }}
           placeholder="Bring your voice. Local + international tracks welcome."
-          className="min-h-24 w-full rounded-lg border border-input bg-transparent px-2.5 py-2 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30 md:text-sm"
-          maxLength={400}
+          className="h-12 text-base"
+          maxLength={MAX_EVENT_DESCRIPTION}
         />
+        <p className="text-xs text-muted-foreground">
+          One line on the invite — it won&apos;t wrap.
+        </p>
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="event-location">Location</Label>

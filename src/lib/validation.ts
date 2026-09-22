@@ -92,6 +92,17 @@ export function validateMessage(value: unknown): string | undefined {
   return message;
 }
 
+/** Collapse the host brief to a single line (no wraps or stored newlines). */
+export function sanitizeEventDescription(value: unknown): string {
+  if (typeof value !== "string") return "";
+  return value.replace(/[\r\n\u2028\u2029]+/g, " ").replace(/[ \t\f\v]+/g, " ").trim();
+}
+
+/** Block Enter / pasted line breaks while the host is still typing. */
+export function stripDescriptionNewlines(value: string): string {
+  return value.replace(/[\r\n\u2028\u2029]+/g, "");
+}
+
 export function validateEventInput(input: {
   title: unknown;
   description: unknown;
@@ -100,7 +111,7 @@ export function validateEventInput(input: {
   timezone?: unknown;
 }): EventInfo {
   const title = trim(input.title);
-  const description = trim(input.description);
+  const description = sanitizeEventDescription(input.description);
   const location = trim(input.location);
 
   if (title.length < 1) throw new Error("Give the event a title.");
