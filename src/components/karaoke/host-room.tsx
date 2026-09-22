@@ -106,7 +106,7 @@ export function HostRoom({
     <AppShell>
       <header className="mb-5 flex items-center justify-between gap-3">
         <BrandMark compact />
-        <Button variant="ghost" className="h-10 text-cyan" render={<Link href={`/room/${code}`} />}>
+        <Button variant="ghost" className="h-12 min-h-12 text-cyan" render={<Link href={`/room/${code}`} />}>
           Guest view
         </Button>
       </header>
@@ -164,7 +164,7 @@ export function HostRoom({
           >
             <div className="mt-2 flex w-full flex-col gap-2 sm:flex-row">
               <Button
-                className="h-12 flex-1"
+                className="h-12 min-h-12 flex-1"
                 onClick={() => void run(() => queueAction(code, "seed"), "Classics are on the list.")}
               >
                 Add 3 classics
@@ -209,7 +209,7 @@ export function HostRoom({
             </h2>
             <Button
               variant="ghost"
-              className="h-11 text-sm"
+              className="h-12 min-h-12 text-sm"
               onClick={() => void run(() => queueAction(code, "clearDone"), "History wiped.")}
             >
               Clear done

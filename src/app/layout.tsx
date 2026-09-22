@@ -31,7 +31,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${outfit.variable} ${bebas.variable} dark h-full antialiased`}
+      className={`${outfit.variable} ${bebas.variable} dark scheme-dark h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         {children}

@@ -99,6 +99,28 @@
   }
   html {
     @apply font-sans;
+    color-scheme: dark;
+  }
+
+  /*
+    Native date controls assume a light page (black glyph). Keep the field
+    48px on mobile, hide the stock indicator, and let our white calendar
+    button sit on top.
+  */
+  input[type="date"],
+  input[type="datetime-local"],
+  input[type="time"] {
+    color-scheme: dark;
+    min-height: 3rem;
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+  input[type="time"]::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    width: 2.25rem;
+    height: 2.25rem;
+    cursor: pointer;
   }
 }
 

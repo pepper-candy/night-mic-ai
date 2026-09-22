@@ -91,7 +91,7 @@ export function ValidationSettingsPanel({
 
       <div className="flex flex-col gap-2 sm:flex-row">
         <Button
-          className="h-12 flex-1"
+          className="h-12 min-h-12 flex-1"
           variant={enabled ? "outline" : "default"}
           disabled={pending || enabled}
           onClick={() => void toggle(true)}
@@ -100,7 +100,7 @@ export function ValidationSettingsPanel({
         </Button>
         {enabled ? (
           <Button
-            className="h-12 flex-1"
+            className="h-12 min-h-12 flex-1"
             variant="outline"
             disabled={pending}
             onClick={() => void toggle(false)}
@@ -111,7 +111,7 @@ export function ValidationSettingsPanel({
       </div>
 
       {enabled ? (
-        <Button variant="ghost" className="h-11 w-full" onClick={() => void copyCohostLink()}>
+        <Button variant="ghost" className="h-12 min-h-12 w-full" onClick={() => void copyCohostLink()}>
           {copied ? (
             <CheckIcon data-icon="inline-start" />
           ) : (
