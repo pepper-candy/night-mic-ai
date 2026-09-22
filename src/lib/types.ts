@@ -79,6 +79,15 @@ export interface SongSearchHit {
   source: string;
 }
 
+export interface SongSearchCatalogs {
+  /** Apple iTunes Search — always on, no key. */
+  apple: boolean;
+  /** Exact Spotify track URLs. False → search-page links instead. */
+  spotify: boolean;
+  /** Exact YouTube watch URLs. False → karaoke search-page links instead. */
+  youtube: boolean;
+}
+
 export interface ApiError {
   error: string;
 }
@@ -89,7 +98,7 @@ export const MAX_SONGS_PER_GUEST = 12;
 export const MAX_TITLE = 80;
 export const MAX_ARTIST = 80;
 export const MAX_NAME = 24;
-export const MAX_URL = 300;
+export const MAX_URL = 800;
 export const MAX_EVENT_TITLE = 80;
 export const MAX_EVENT_DESCRIPTION = 400;
 export const MAX_EVENT_LOCATION = 120;

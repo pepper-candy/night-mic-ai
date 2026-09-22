@@ -6,6 +6,7 @@ import {
 import type {
   CreateRoomResponse,
   PublicRoom,
+  SongSearchCatalogs,
   SongSearchHit,
 } from "@/lib/types";
 
@@ -129,13 +130,14 @@ export async function setValidation(
   );
 }
 
-export async function searchSongs(query: string): Promise<SongSearchHit[]> {
+export async function searchSongs(
+  query: string,
+): Promise<{ results: SongSearchHit[]; catalogs: SongSearchCatalogs }> {
   const url = new URL("/api/songs/search", window.location.origin);
   url.searchParams.set("q", query);
-  const data = await parse<{ results: SongSearchHit[] }>(
+  return parse<{ results: SongSearchHit[]; catalogs: SongSearchCatalogs }>(
     await fetch(url.toString(), { cache: "no-store" }),
   );
-  return data.results;
 }
 
 export function peekCohostToken(code: string) {

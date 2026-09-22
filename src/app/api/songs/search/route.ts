@@ -1,5 +1,5 @@
 import { errorResponse } from "@/lib/rooms";
-import { searchSongs } from "@/lib/song-search";
+import { getSongSearchCatalogs, searchSongs } from "@/lib/song-search";
 
 export const dynamic = "force-dynamic";
 
@@ -8,13 +8,10 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const q = searchParams.get("q") ?? "";
     if (q.trim().length < 2) {
-      return Response.json({ results: [] });
+      return Response.json({ results: [], catalogs: getSongSearchCatalogs() });
     }
-    const results = await searchSongs(q, 8);
-    return Response.json(
-      { results },
-      { headers: { "Cache-Control": "no-store" } },
-    );
+    const payload = await searchSongs(q, 8);
+    return Response.json(payload, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     return errorResponse(error);
   }

@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { languageLabel, lyricsSearchButtonLabel, lyricsSearchUrl } from "@/lib/media";
+import { languageLabel, lyricsSearchButtonLabel, lyricsSearchUrl, spotifyCatalogSearchUrl, youtubeKaraokeSearchUrl } from "@/lib/media";
 import { timeAgo } from "@/lib/time";
 import type { QueueItem } from "@/lib/types";
 import {
@@ -103,7 +103,17 @@ export function SongRow({
                     YouTube / karaoke
                     <ExternalLinkIcon className="size-3.5" />
                   </a>
-                ) : null}
+                ) : (
+                  <a
+                    href={youtubeKaraokeSearchUrl(song.title, song.artist)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 text-sm text-cyan underline-offset-4 hover:underline"
+                  >
+                    YouTube karaoke
+                    <ExternalLinkIcon className="size-3.5" />
+                  </a>
+                )}
                 {song.spotifyUrl ? (
                   <a
                     href={song.spotifyUrl}
@@ -114,7 +124,17 @@ export function SongRow({
                     Spotify
                     <ExternalLinkIcon className="size-3.5" />
                   </a>
-                ) : null}
+                ) : (
+                  <a
+                    href={spotifyCatalogSearchUrl(song.title, song.artist)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 text-sm text-cyan underline-offset-4 hover:underline"
+                  >
+                    Spotify search
+                    <ExternalLinkIcon className="size-3.5" />
+                  </a>
+                )}
               </div>
             </div>
             {staff && onRemove ? (

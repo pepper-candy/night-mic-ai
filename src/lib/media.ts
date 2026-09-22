@@ -1,3 +1,41 @@
+export function youtubeKaraokeSearchUrl(title: string, artist: string): string {
+  const q = [title.trim(), artist.trim(), "karaoke"].filter(Boolean).join(" ");
+  return `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`;
+}
+
+export function spotifyCatalogSearchUrl(title: string, artist: string): string {
+  const q = [title.trim(), artist.trim()].filter(Boolean).join(" ");
+  return `https://open.spotify.com/search/${encodeURIComponent(q)}`;
+}
+
+export function isYoutubeResultsUrl(url: string | undefined): boolean {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.replace(/^www\./, "");
+    return (
+      (host === "youtube.com" || host === "m.youtube.com") &&
+      parsed.pathname === "/results"
+    );
+  } catch {
+    return false;
+  }
+}
+
+export function isSpotifySearchUrl(url: string | undefined): boolean {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.replace(/^www\./, "");
+    return (
+      (host === "open.spotify.com" || host === "spotify.com") &&
+      parsed.pathname.startsWith("/search")
+    );
+  } catch {
+    return false;
+  }
+}
+
 export function youtubeVideoId(url: string | undefined): string | null {
   if (!url) return null;
   try {

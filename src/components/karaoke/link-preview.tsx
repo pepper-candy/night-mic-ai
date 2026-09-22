@@ -1,6 +1,11 @@
 "use client";
 
-import { spotifyEmbedUrl, youtubeVideoId } from "@/lib/media";
+import {
+  isSpotifySearchUrl,
+  isYoutubeResultsUrl,
+  spotifyEmbedUrl,
+  youtubeVideoId,
+} from "@/lib/media";
 
 export function LinkPreview({
   url,
@@ -11,11 +16,17 @@ export function LinkPreview({
 }) {
   const yt = youtubeVideoId(url);
   const spotify = spotifyEmbedUrl(spotifyUrl) || spotifyEmbedUrl(url);
+  const ytSearch = !yt && isYoutubeResultsUrl(url) ? url : null;
+  const spotifySearch =
+    !spotify && (isSpotifySearchUrl(spotifyUrl) || isSpotifySearchUrl(url))
+      ? spotifyUrl || url
+      : null;
 
-  if (!yt && !spotify) {
+  if (!yt && !spotify && !ytSearch && !spotifySearch) {
     return (
       <p className="rounded-xl border border-dashed border-border px-3 py-4 text-sm text-muted-foreground">
-        No embeddable YouTube or Spotify link on this song yet.
+        No YouTube or Spotify link on this song yet. Search-autofill adds a karaoke
+        search page even without API keys; add keys for an embedded video.
       </p>
     );
   }
@@ -32,6 +43,15 @@ export function LinkPreview({
             allowFullScreen
           />
         </div>
+      ) : ytSearch ? (
+        <a
+          href={ytSearch}
+          target="_blank"
+          rel="noreferrer"
+          className="block rounded-xl border border-cyan/40 bg-cyan/10 px-4 py-3 text-sm text-cyan"
+        >
+          Open YouTube karaoke search (no exact video until YOUTUBE_API_KEY is set)
+        </a>
       ) : null}
       {spotify ? (
         <iframe
@@ -41,6 +61,15 @@ export function LinkPreview({
           allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
           loading="lazy"
         />
+      ) : spotifySearch ? (
+        <a
+          href={spotifySearch}
+          target="_blank"
+          rel="noreferrer"
+          className="block rounded-xl border border-cyan/40 bg-cyan/10 px-4 py-3 text-sm text-cyan"
+        >
+          Open Spotify search (add Spotify API keys for an embedded track)
+        </a>
       ) : null}
     </div>
   );

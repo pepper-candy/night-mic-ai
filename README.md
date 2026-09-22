@@ -55,7 +55,56 @@ Copy `.env.example` to `.env.local` if you want Redis locally.
 
 Either the Upstash pair **or** the Vercel KV pair is enough. If both are set, Upstash wins.
 
-Song search **always** works for title + artist via Apple’s free iTunes Search API (no key). YouTube/Spotify link autofill needs the optional keys above.
+Song search **always** fills a readable title + artist (Apple iTunes, including the HK storefront for Cantonese). Picking a result also fills YouTube and Spotify **search-page** links with no keys. Add the optional keys below if you want a specific video/track (needed for embedded cohost preview).
+
+## How to add YouTube / Spotify keys
+
+I cannot generate these keys for you — Google and Spotify only issue them to your account. Night Mic just reads whatever you paste into environment variables.
+
+### A. Local laptop (`npm run dev`)
+
+1. Copy `.env.example` to `.env.local` in the project root.
+2. Paste the keys on the matching lines (no quotes).
+3. Restart the dev server (`Ctrl+C`, then `npm run dev`). Next.js only loads env files at boot.
+
+### B. Production (Vercel)
+
+1. Open the project on [Vercel](https://vercel.com) → **Settings** → **Environment Variables**.
+2. Add:
+   - `YOUTUBE_API_KEY`
+   - `SPOTIFY_CLIENT_ID`
+   - `SPOTIFY_CLIENT_SECRET`
+3. Apply to Production (and Preview if you test PRs).
+4. **Redeploy** the latest deployment so the new vars are picked up.
+
+### C. Create a YouTube key (free)
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/) and sign in.
+2. **New project** (name it `night-mic` or similar).
+3. **APIs & Services → Library** → search **YouTube Data API v3** → **Enable**.
+4. **APIs & Services → Credentials** → **Create credentials → API key**.
+5. Click the key → **API restrictions** → restrict to **YouTube Data API v3** → Save.
+6. Copy the key into `YOUTUBE_API_KEY`.
+
+Default quota is 10,000 units/day. Each karaoke lookup costs 100 units, so roughly 100 searches/day. That is enough for a society night; if you go over, search still fills iTunes title/artist plus YouTube *search* links.
+
+### D. Create Spotify keys (free)
+
+1. Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) and log in with Spotify.
+2. **Create app**. App name e.g. `Night Mic`. Redirect URI: `http://localhost:3847` (required by the form, unused for search).
+3. Open the app → **Settings** → copy **Client ID** and **Client Secret**.
+4. Paste into `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET`.
+
+No extra Spotify product is required. This uses Client Credentials (app-only, not a user’s library).
+
+### What guests see
+
+| Keys set? | Title / artist | YouTube field | Spotify field | Cohost embed |
+| --- | --- | --- | --- | --- |
+| None (default) | Yes (iTunes) | Karaoke search page | Search page | Open-in-tab, not an iframe |
+| YouTube key | Yes | Specific `watch?v=` on the top hit | Search page | YouTube iframe |
+| Spotify keys | Yes | Search page | Specific track URL | Spotify iframe |
+| Both | Yes | Specific video | Specific track | Both embeds |
 
 **Persistence modes**
 
@@ -91,7 +140,7 @@ Origin and Vercel both speak git. Origin holds the source of truth for this work
 - Near-real-time sync via 1.5s polling (works on Vercel serverless; no long-lived socket server)
 - `@upstash/redis` when credentials are present
 
-Song entry is free text with optional catalog search (iTunes, plus Spotify/YouTube when keys are set).
+Song entry is free text with catalog search: Apple iTunes always, plus YouTube/Spotify search-page links. Optional API keys upgrade those to exact video/track URLs.
 
 ## Hardening later (not in this MVP)
 

@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { languageLabel, lyricsSearchButtonLabel, lyricsSearchUrl } from "@/lib/media";
+import { languageLabel, lyricsSearchButtonLabel, lyricsSearchUrl, spotifyCatalogSearchUrl, youtubeKaraokeSearchUrl } from "@/lib/media";
 import { timeAgo } from "@/lib/time";
 import type { QueueItem } from "@/lib/types";
 import { ExternalLinkIcon, SkipForwardIcon } from "lucide-react";
@@ -70,7 +70,22 @@ export function NowPlaying({
             <ExternalLinkIcon data-icon="inline-start" />
             Open track
           </Button>
-        ) : null}
+        ) : (
+          <Button
+            variant="outline"
+            className="h-12 flex-1"
+            render={
+              <a
+                href={youtubeKaraokeSearchUrl(song.title, song.artist)}
+                target="_blank"
+                rel="noreferrer"
+              />
+            }
+          >
+            <ExternalLinkIcon data-icon="inline-start" />
+            YouTube karaoke
+          </Button>
+        )}
         {song.spotifyUrl ? (
           <Button
             variant="outline"
@@ -80,7 +95,22 @@ export function NowPlaying({
             <ExternalLinkIcon data-icon="inline-start" />
             Spotify
           </Button>
-        ) : null}
+        ) : (
+          <Button
+            variant="outline"
+            className="h-12 flex-1"
+            render={
+              <a
+                href={spotifyCatalogSearchUrl(song.title, song.artist)}
+                target="_blank"
+                rel="noreferrer"
+              />
+            }
+          >
+            <ExternalLinkIcon data-icon="inline-start" />
+            Spotify search
+          </Button>
+        )}
         {isHost && onSkip ? (
           <Button className="h-12 flex-1 neon-button" onClick={onSkip}>
             <SkipForwardIcon data-icon="inline-start" />

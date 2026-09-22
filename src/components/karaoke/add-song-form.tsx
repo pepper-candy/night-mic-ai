@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { searchSongs, submitSong } from "@/lib/api-client";
 import { getDisplayName, getGuestId } from "@/lib/identity";
-import type { PublicRoom, SongLanguage, SongSearchHit } from "@/lib/types";
+import type { PublicRoom, SongLanguage, SongSearchCatalogs, SongSearchHit } from "@/lib/types";
 import { SearchIcon, XIcon } from "lucide-react";
 
 const LANGUAGE_OPTIONS: Array<{ value: SongLanguage; label: string }> = [
@@ -33,6 +33,7 @@ export function AddSongForm({
   const [searching, setSearching] = useState(false);
   const [suggestions, setSuggestions] = useState<SongSearchHit[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [catalogs, setCatalogs] = useState<SongSearchCatalogs | null>(null);
   const debounceRef = useRef<number | null>(null);
   const blurTimer = useRef<number | null>(null);
 
@@ -62,12 +63,13 @@ export function AddSongForm({
     }
     setSearching(true);
     try {
-      const results = await searchSongs(q);
-      setSuggestions(results);
+      const data = await searchSongs(q);
+      setSuggestions(data.results);
+      setCatalogs(data.catalogs);
       setShowSuggestions(true);
       if (announce) {
-        if (results.length === 0) toast.message("No matches. You can still type it in.");
-        else toast.success(`Found ${results.length} match${results.length === 1 ? "" : "es"}.`);
+        if (data.results.length === 0) toast.message("No matches. You can still type it in.");
+        else toast.success(`Found ${data.results.length} match${data.results.length === 1 ? "" : "es"}.`);
       }
     } catch (error) {
       if (announce) {
@@ -127,7 +129,18 @@ export function AddSongForm({
         <p className="font-display text-2xl tracking-wide">Throw a song on</p>
         <p className="text-sm text-muted-foreground">
           Search as you type, or tap the magnifier. Pick a language so the room stays mixed.
+          Choosing a result fills title, artist, and YouTube / Spotify links.
         </p>
+        {catalogs ? (
+          <p className="text-xs text-muted-foreground">
+            {catalogs.youtube
+              ? "YouTube: exact karaoke video on the top hit."
+              : "YouTube: karaoke search page (add YOUTUBE_API_KEY for a specific video)."}{" "}
+            {catalogs.spotify
+              ? "Spotify: exact track link."
+              : "Spotify: search page (add SPOTIFY_CLIENT_ID + SECRET for a specific track)."}
+          </p>
+        ) : null}
       </div>
 
       <div className="space-y-1.5">
@@ -252,7 +265,7 @@ export function AddSongForm({
           onChange={(event) => setUrl(event.target.value)}
           placeholder="https://"
           className="h-12 text-base"
-          maxLength={300}
+          maxLength={800}
           autoComplete="off"
         />
       </div>
@@ -267,7 +280,7 @@ export function AddSongForm({
             onChange={(event) => setSpotifyUrl(event.target.value)}
             placeholder="https://open.spotify.com/…"
             className="h-12 pr-10 text-base"
-            maxLength={300}
+            maxLength={800}
             autoComplete="off"
           />
           {spotifyUrl ? (

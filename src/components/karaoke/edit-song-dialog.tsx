@@ -117,7 +117,7 @@ function EditSongForm({
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           className="h-11"
-          maxLength={300}
+          maxLength={800}
         />
       </div>
       <div className="space-y-1.5">
@@ -128,7 +128,7 @@ function EditSongForm({
           value={spotifyUrl}
           onChange={(e) => setSpotifyUrl(e.target.value)}
           className="h-11"
-          maxLength={300}
+          maxLength={800}
         />
       </div>
       <Button type="submit" disabled={pending} className="h-12 w-full neon-button">
