@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { YoutubeSearchPicker } from "@/components/karaoke/youtube-search-picker";
 import { searchSongs, submitSong } from "@/lib/api-client";
 import { getGuestId, getRoomNickname } from "@/lib/identity";
 import { assignMediaLink, spotifyCatalogSearchUrl } from "@/lib/media";
@@ -269,19 +270,22 @@ export function AddSongForm({
               />
             </div>
 
-            <Button type="button" variant="outline" className="h-12 w-full" onClick={findSongLink}>
-              Find song link
-            </Button>
+            <YoutubeSearchPicker
+              title={title}
+              artist={artist}
+              onPick={setLink}
+              onFindSpotify={findSongLink}
+            />
 
             <div className="space-y-1.5">
-              <Label htmlFor="song-link">Link?</Label>
+              <Label htmlFor="song-link">YouTube or Spotify link</Label>
               <div className="relative">
                 <Input
                   id="song-link"
                   type="url"
                   value={link}
                   onChange={(event) => setLink(event.target.value)}
-                  placeholder="https://open.spotify.com/…"
+                  placeholder="https://www.youtube.com/watch?v=…"
                   className="h-12 pr-10 text-base"
                   maxLength={MAX_URL}
                   autoComplete="off"

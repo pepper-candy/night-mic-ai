@@ -1,13 +1,18 @@
 "use client";
 
+import { useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LinkPreview } from "@/components/karaoke/link-preview";
 import { VerifiedBadge } from "@/components/karaoke/verified-badge";
-import { languageLabel, LYRICS_BUTTON_LABEL, lyricsSearchUrl } from "@/lib/media";
+import {
+  YoutubeHostPlayer,
+  type YoutubeHostPlayerHandle,
+} from "@/components/karaoke/youtube-host-player";
+import { languageLabel, LYRICS_BUTTON_LABEL, lyricsSearchUrl, youtubeVideoId } from "@/lib/media";
 import { timeAgo } from "@/lib/time";
 import type { QueueItem } from "@/lib/types";
-import { ExternalLinkIcon, SkipForwardIcon } from "lucide-react";
+import { ExternalLinkIcon, PauseIcon, PlayIcon, SkipForwardIcon } from "lucide-react";
 
 export function NowPlaying({
   song,
@@ -35,11 +40,39 @@ export function NowPlaying({
     );
   }
 
+  return (
+    <NowPlayingCard
+      song={song}
+      isHost={isHost}
+      showLyrics={showLyrics}
+      showEmbed={showEmbed}
+      onSkip={onSkip}
+    />
+  );
+}
+
+function NowPlayingCard({
+  song,
+  isHost,
+  showLyrics,
+  showEmbed,
+  onSkip,
+}: {
+  song: QueueItem;
+  isHost?: boolean;
+  showLyrics: boolean;
+  showEmbed: boolean;
+  onSkip?: () => void;
+}) {
+  const playerRef = useRef<YoutubeHostPlayerHandle>(null);
+  const [playing, setPlaying] = useState(false);
   const lang = song.language
     ? languageLabel(song.language, song.languageOther)
     : undefined;
   const youtubeHref = song.url?.trim() || undefined;
   const spotifyHref = song.spotifyUrl?.trim() || undefined;
+  const ytId = youtubeVideoId(song.url);
+  const hostPlayer = Boolean(isHost && showEmbed && ytId);
 
   return (
     <section className="now-playing px-5 py-6">
@@ -73,7 +106,7 @@ export function NowPlaying({
         {showLyrics ? (
           <Button
             variant="outline"
-            className="h-12 max-w-full flex-1 truncate"
+            className="h-12 min-h-12 max-w-full flex-1 truncate"
             render={
               <a
                 href={lyricsSearchUrl(song.title, song.language)}
@@ -85,20 +118,34 @@ export function NowPlaying({
             {LYRICS_BUTTON_LABEL}
           </Button>
         ) : null}
-        {youtubeHref ? (
+        {hostPlayer ? (
+          <Button
+            type="button"
+            variant="outline"
+            className="h-12 min-h-12 flex-1"
+            onClick={() => playerRef.current?.toggle()}
+          >
+            {playing ? (
+              <PauseIcon data-icon="inline-start" />
+            ) : (
+              <PlayIcon data-icon="inline-start" />
+            )}
+            {playing ? "Pause" : "Play"}
+          </Button>
+        ) : youtubeHref ? (
           <Button
             variant="outline"
-            className="h-12 flex-1"
+            className="h-12 min-h-12 flex-1"
             render={<a href={youtubeHref} target="_blank" rel="noreferrer" />}
           >
             <ExternalLinkIcon data-icon="inline-start" />
             YouTube
           </Button>
         ) : null}
-        {spotifyHref ? (
+        {spotifyHref && !hostPlayer ? (
           <Button
             variant="outline"
-            className="h-12 flex-1"
+            className="h-12 min-h-12 flex-1"
             render={<a href={spotifyHref} target="_blank" rel="noreferrer" />}
           >
             <ExternalLinkIcon data-icon="inline-start" />
@@ -106,16 +153,40 @@ export function NowPlaying({
           </Button>
         ) : null}
         {isHost && onSkip ? (
-          <Button className="h-12 flex-1 neon-button" onClick={onSkip}>
+          <Button className="h-12 min-h-12 flex-1 neon-button" onClick={onSkip}>
             <SkipForwardIcon data-icon="inline-start" />
             Skip / next
           </Button>
         ) : null}
       </div>
-      {showEmbed && (youtubeHref || spotifyHref) ? (
+      {hostPlayer && ytId ? (
+        <div className="mt-4 space-y-2">
+          <YoutubeHostPlayer
+            ref={playerRef}
+            videoId={ytId}
+            onPlayingChange={setPlaying}
+            onEnded={onSkip}
+          />
+          {youtubeHref ? (
+            <a
+              href={youtubeHref}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 text-xs text-cyan"
+            >
+              <ExternalLinkIcon className="size-3.5" />
+              Open on YouTube
+            </a>
+          ) : null}
+        </div>
+      ) : showEmbed && (youtubeHref || spotifyHref) ? (
         <div className="mt-4">
           <LinkPreview url={song.url} spotifyUrl={song.spotifyUrl} />
         </div>
+      ) : isHost && showEmbed ? (
+        <p className="mt-4 text-sm text-muted-foreground">
+          No YouTube video on this song yet. Search from Add a song or edit the queue item.
+        </p>
       ) : null}
     </section>
   );

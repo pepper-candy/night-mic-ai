@@ -7,6 +7,7 @@ import type {
   CreateRoomResponse,
   PublicRoom,
   SongSearchHit,
+  YoutubeSearchHit,
 } from "@/lib/types";
 
 async function parse<T>(res: Response): Promise<T> {
@@ -148,6 +149,15 @@ export async function searchSongs(query: string): Promise<SongSearchHit[]> {
   const url = new URL("/api/songs/search", window.location.origin);
   url.searchParams.set("q", query);
   const data = await parse<{ results: SongSearchHit[] }>(
+    await fetch(url.toString(), { cache: "no-store" }),
+  );
+  return data.results;
+}
+
+export async function searchYoutube(query: string): Promise<YoutubeSearchHit[]> {
+  const url = new URL("/api/youtube/search", window.location.origin);
+  url.searchParams.set("q", query);
+  const data = await parse<{ results: YoutubeSearchHit[] }>(
     await fetch(url.toString(), { cache: "no-store" }),
   );
   return data.results;

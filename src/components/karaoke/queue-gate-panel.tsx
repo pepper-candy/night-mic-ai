@@ -6,10 +6,14 @@ import { DateTimeLocalInput } from "@/components/karaoke/datetime-local-input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { setQueueGate } from "@/lib/api-client";
-import { resolveEventTimezone, toDatetimeLocalInZone } from "@/lib/event-time";
+import {
+  formatDatetimeLocalValue,
+  resolveEventTimezone,
+  toDatetimeLocalInZone,
+} from "@/lib/event-time";
 import { isQueueAccepting } from "@/lib/queue-gate";
 import type { PublicRoom } from "@/lib/types";
-import { CheckIcon } from "lucide-react";
+import { CheckIcon, PauseIcon, PlayIcon } from "lucide-react";
 
 export function QueueGatePanel({
   code,
@@ -26,6 +30,7 @@ export function QueueGatePanel({
     room.queueOpensAt ? toDatetimeLocalInZone(room.queueOpensAt, timezone) : "",
   );
   const [pending, setPending] = useState(false);
+  const opensAtLabel = formatDatetimeLocalValue(opensAt);
 
   async function save(open: boolean, scheduled: boolean) {
     setPending(true);
@@ -59,33 +64,34 @@ export function QueueGatePanel({
         )}
       </div>
 
-      <div className="flex items-stretch gap-2">
+      <div className="flex h-12 min-h-12 items-stretch gap-2">
         <Button
           type="button"
+          size="icon"
           disabled={pending}
           variant={accepting ? "outline" : "default"}
-          className={`h-12 min-h-12 shrink-0 px-5 ${accepting ? "" : "neon-button"}`}
+          className={`size-12 min-h-12 min-w-12 shrink-0 ${accepting ? "" : "neon-button"}`}
+          aria-label={accepting ? "Pause guest song additions" : "Allow guest song additions"}
           onClick={() => void save(!accepting, false)}
         >
-          {pending ? "…" : accepting ? "Pause" : "On"}
+          {accepting ? <PauseIcon className="size-5" /> : <PlayIcon className="size-5" />}
         </Button>
 
-        <div className="flex h-12 min-h-12 min-w-0 flex-1 items-stretch gap-0.5 rounded-lg border border-input bg-transparent pl-1 dark:bg-input/30">
-          <span className="hidden shrink-0 self-center pl-1 text-xs text-muted-foreground sm:inline">
-            After this date
-          </span>
+        <div className="flex h-12 min-h-12 min-w-0 flex-1 items-center rounded-lg border border-input bg-transparent dark:bg-input/30">
           <DateTimeLocalInput
             id="queue-opens"
             value={opensAt}
             onChange={(event) => setOpensAt(event.target.value)}
             aria-label="After this date"
-            className="h-12 min-h-12 border-0 bg-transparent px-1 shadow-none focus-visible:ring-0 dark:bg-transparent"
+            emptyLabel="After this date"
+            displayValue={opensAtLabel}
+            className="h-12 min-h-12 border-0 bg-transparent px-1 shadow-none focus-visible:border-transparent focus-visible:ring-0 dark:bg-transparent"
           />
           <Button
             type="button"
             size="icon"
             variant="ghost"
-            className="size-12 min-h-12 min-w-12 shrink-0 self-center"
+            className="size-12 min-h-12 min-w-12 shrink-0"
             disabled={pending || !opensAt}
             aria-label="Update open date"
             onClick={() => void save(false, true)}

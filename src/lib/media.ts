@@ -1,7 +1,13 @@
+/** Karaoke-oriented YouTube query from title and/or artist. */
+export function youtubeKaraokeQuery(title: string, artist = ""): string {
+  return [title.trim(), artist.trim(), "karaoke"].filter(Boolean).join(" ");
+}
+
 /** YouTube results page — tap to pick a karaoke video. No API key. */
 export function youtubeKaraokeSearchUrl(title: string, artist = ""): string {
-  const q = [title.trim(), artist.trim(), "karaoke"].filter(Boolean).join(" ");
-  return `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`;
+  return `https://www.youtube.com/results?search_query=${encodeURIComponent(
+    youtubeKaraokeQuery(title, artist),
+  )}`;
 }
 
 /** Spotify catalog search page — tap to find the track. No API key. */
