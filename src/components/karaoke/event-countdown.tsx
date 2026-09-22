@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { DescriptionNote } from "@/components/karaoke/description-note";
-import { MusicScoreScope } from "@/components/karaoke/music-score-scope";
 import { eventTimezoneLabel, formatEventWhen } from "@/lib/event-time";
 import { countdownParts } from "@/lib/time";
 import type { EventInfo } from "@/lib/types";
@@ -84,17 +83,15 @@ export function UpcomingEventBanner({ event }: { event: EventInfo }) {
   if (now >= event.startsAt) return null;
 
   return (
-    <MusicScoreScope className="mb-4 -mx-2 px-3 py-4">
-      <div className="space-y-3">
-        <EventCountdown startsAt={event.startsAt} timezone={event.timezone} />
-        {event.description ? <DescriptionNote text={event.description} /> : null}
-        {event.location ? (
-          <p className="flex items-start gap-2 px-1 text-sm text-muted-foreground">
-            <MapPinIcon className="mt-0.5 size-4 shrink-0 text-cyan" />
-            <span>{event.location}</span>
-          </p>
-        ) : null}
-      </div>
-    </MusicScoreScope>
+    <div className="mb-4 space-y-3">
+      <EventCountdown startsAt={event.startsAt} timezone={event.timezone} />
+      {event.description ? <DescriptionNote text={event.description} /> : null}
+      {event.location ? (
+        <p className="flex items-start gap-2 px-1 text-sm text-muted-foreground">
+          <MapPinIcon className="mt-0.5 size-4 shrink-0 text-cyan" />
+          <span>{event.location}</span>
+        </p>
+      ) : null}
+    </div>
   );
 }

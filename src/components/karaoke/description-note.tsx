@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { sanitizeEventDescription } from "@/lib/validation";
 
 function EighthNote({ className }: { className?: string }) {
@@ -24,13 +25,57 @@ function BeamedNotes({ className }: { className?: string }) {
   );
 }
 
-/** Single-line invite brief with dim decorative note glyphs inside the pill. */
+/** Soft staff lines + pink/cyan/gold bloom, clipped to the brief pill. */
+function BriefScoreBackdrop() {
+  const uid = useId().replace(/:/g, "");
+
+  return (
+    <svg
+      viewBox="0 0 360 56"
+      className="pointer-events-none absolute inset-0 h-full w-full"
+      aria-hidden
+      preserveAspectRatio="none"
+    >
+      <defs>
+        <linearGradient id={`${uid}-glow`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#ff2f92" stopOpacity="0.16" />
+          <stop offset="55%" stopColor="#18e7ff" stopOpacity="0.07" />
+          <stop offset="100%" stopColor="#ffd24a" stopOpacity="0.12" />
+        </linearGradient>
+        <radialGradient id={`${uid}-bloom-pink`} cx="10%" cy="20%" r="55%">
+          <stop offset="0%" stopColor="#ff2f92" stopOpacity="0.2" />
+          <stop offset="100%" stopColor="#ff2f92" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id={`${uid}-bloom-cyan`} cx="96%" cy="70%" r="48%">
+          <stop offset="0%" stopColor="#18e7ff" stopOpacity="0.14" />
+          <stop offset="100%" stopColor="#18e7ff" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id={`${uid}-bloom-gold`} cx="50%" cy="110%" r="42%">
+          <stop offset="0%" stopColor="#ffd24a" stopOpacity="0.1" />
+          <stop offset="100%" stopColor="#ffd24a" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <rect width="360" height="56" fill={`url(#${uid}-glow)`} />
+      <rect width="360" height="56" fill={`url(#${uid}-bloom-pink)`} />
+      <rect width="360" height="56" fill={`url(#${uid}-bloom-cyan)`} />
+      <rect width="360" height="56" fill={`url(#${uid}-bloom-gold)`} />
+      <path d="M8 10h344" stroke="#ffd24a" strokeOpacity="0.22" strokeWidth="1" />
+      <path d="M8 19h344" stroke="#18e7ff" strokeOpacity="0.14" strokeWidth="1" />
+      <path d="M8 28h344" stroke="#ffd24a" strokeOpacity="0.16" strokeWidth="1" />
+      <path d="M8 37h344" stroke="#18e7ff" strokeOpacity="0.12" strokeWidth="1" />
+      <path d="M8 46h344" stroke="#ffd24a" strokeOpacity="0.14" strokeWidth="1" />
+    </svg>
+  );
+}
+
+/** Single-line invite brief: staff + glow + dim ♪/♫ stay inside the pill. */
 export function DescriptionNote({ text }: { text: string }) {
   const line = sanitizeEventDescription(text);
   if (!line) return null;
 
   return (
-    <div className="relative flex min-h-14 items-center overflow-hidden rounded-2xl border border-gold/20 bg-[#1a0820] px-3 py-3">
+    <div className="relative flex min-h-14 items-center overflow-hidden rounded-2xl border border-gold/20 bg-[#1a0820] px-3 py-3 shadow-[inset_0_0_28px_rgb(255_47_146_/_10%),inset_0_0_18px_rgb(24_231_255_/_6%)]">
+      <BriefScoreBackdrop />
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
         <EighthNote className="absolute top-1/2 left-2 size-5 -translate-y-1/2 text-gold/20" />
         <BeamedNotes className="absolute top-1/2 right-14 size-5 -translate-y-1/2 text-cyan/15" />
