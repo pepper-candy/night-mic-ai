@@ -6,11 +6,7 @@ import { DateTimeLocalInput } from "@/components/karaoke/datetime-local-input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { setQueueGate } from "@/lib/api-client";
-import {
-  formatDatetimeLocalValue,
-  resolveEventTimezone,
-  toDatetimeLocalInZone,
-} from "@/lib/event-time";
+import { resolveEventTimezone, toDatetimeLocalInZone } from "@/lib/event-time";
 import { isQueueAccepting } from "@/lib/queue-gate";
 import type { PublicRoom } from "@/lib/types";
 import { CheckIcon, PauseIcon, PlayIcon } from "lucide-react";
@@ -30,7 +26,6 @@ export function QueueGatePanel({
     room.queueOpensAt ? toDatetimeLocalInZone(room.queueOpensAt, timezone) : "",
   );
   const [pending, setPending] = useState(false);
-  const opensAtLabel = formatDatetimeLocalValue(opensAt);
 
   async function save(open: boolean, scheduled: boolean) {
     setPending(true);
@@ -59,7 +54,7 @@ export function QueueGatePanel({
           </Badge>
         ) : (
           <Badge variant="secondary" className="bg-secondary text-muted-foreground">
-            OFF
+            CLOSED
           </Badge>
         )}
       </div>
@@ -82,9 +77,8 @@ export function QueueGatePanel({
             id="queue-opens"
             value={opensAt}
             onChange={(event) => setOpensAt(event.target.value)}
-            aria-label="After this date"
-            emptyLabel="After this date"
-            displayValue={opensAtLabel}
+            aria-label="or After this Date"
+            emptyLabel="or After this Date"
             className="h-12 min-h-12 border-0 bg-transparent px-1 shadow-none focus-visible:border-transparent focus-visible:ring-0 dark:bg-transparent"
           />
           <Button

@@ -151,8 +151,9 @@
   }
 
   /*
-    Overlay mode: hide native datetime text (often clipped or underlined
-    on mobile) so our placeholder / formatted value can sit inside the field.
+    Empty overlay only: hide native datetime chrome (mm/dd/yyyy --:--) so the
+    custom placeholder can sit in the field. When a value is chosen the
+    overlay class is removed and the native value paints alone.
   */
   input.datetime-local-overlay {
     color: transparent;

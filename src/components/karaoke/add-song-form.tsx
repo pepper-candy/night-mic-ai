@@ -2,10 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { YoutubeSearchPicker } from "@/components/karaoke/youtube-search-picker";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { YoutubeSearchPicker } from "@/components/karaoke/youtube-search-picker";
 import { searchSongs, submitSong } from "@/lib/api-client";
 import { getGuestId, getRoomNickname } from "@/lib/identity";
 import { assignMediaLink, spotifyCatalogSearchUrl } from "@/lib/media";
@@ -31,6 +32,7 @@ export function AddSongForm({
   asName,
   locked = false,
   lockedMessage,
+  accepting,
 }: {
   code: string;
   onAdded: (room: PublicRoom) => void;
@@ -38,6 +40,8 @@ export function AddSongForm({
   asName?: string;
   locked?: boolean;
   lockedMessage?: string;
+  /** Guest intake state from `isQueueAccepting` — drives LIVE / CLOSED. */
+  accepting?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -174,9 +178,22 @@ export function AddSongForm({
         aria-expanded={open}
       >
         <div>
-          <p className="font-display text-2xl tracking-wide">Throw a song on</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="font-display text-2xl tracking-wide">Throw a song on</p>
+            {typeof accepting === "boolean" ? (
+              accepting ? (
+                <Badge variant="secondary" className="bg-emerald-500/15 text-emerald-400">
+                  LIVE
+                </Badge>
+              ) : (
+                <Badge variant="secondary" className="bg-secondary text-muted-foreground">
+                  CLOSED
+                </Badge>
+              )
+            ) : null}
+          </div>
           <p className="text-sm text-muted-foreground">Give us your favourite song!</p>
-          {!open ? (
+          {!open && accepting !== false && !locked ? (
             <p className="mt-1 text-xs text-cyan">Tap to add yours</p>
           ) : null}
         </div>

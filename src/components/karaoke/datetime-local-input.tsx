@@ -22,17 +22,14 @@ function openPicker(event: MouseEvent<HTMLButtonElement>) {
 export function DateTimeLocalInput({
   className,
   emptyLabel,
-  displayValue,
   ...props
 }: Omit<ComponentProps<typeof Input>, "type"> & {
-  /** Shown inside the field when empty (datetime-local has no real placeholder). */
+  /** Custom placeholder. Native datetime-local rarely honors `placeholder`. */
   emptyLabel?: string;
-  /** Readable value drawn over the native control so mobile does not clip it. */
-  displayValue?: string;
 }) {
   const value = typeof props.value === "string" ? props.value : "";
-  const overlay = value ? displayValue || value : emptyLabel;
-  const useOverlay = Boolean(emptyLabel || displayValue);
+  const isEmpty = value.length === 0;
+  const showPlaceholder = isEmpty && Boolean(emptyLabel);
 
   return (
     <div className="relative min-h-12 w-full min-w-0 flex-1">
@@ -41,18 +38,16 @@ export function DateTimeLocalInput({
         type="datetime-local"
         className={cn(
           "h-12 min-h-12 w-full min-w-0 border-b-0 pr-11 text-base leading-normal text-foreground shadow-none scheme-dark",
-          useOverlay && "datetime-local-overlay",
+          showPlaceholder && "datetime-local-overlay",
           className,
         )}
       />
-      {useOverlay && overlay ? (
+      {showPlaceholder ? (
         <span
-          className={cn(
-            "pointer-events-none absolute inset-y-0 left-2.5 right-11 flex items-center truncate text-base",
-            value ? "text-foreground" : "text-muted-foreground",
-          )}
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 left-2.5 right-11 flex items-center truncate text-base text-muted-foreground"
         >
-          {overlay}
+          {emptyLabel}
         </span>
       ) : null}
       <button
