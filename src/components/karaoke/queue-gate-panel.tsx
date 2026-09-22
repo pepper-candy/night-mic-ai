@@ -54,7 +54,7 @@ export function QueueGatePanel({
           </Badge>
         ) : (
           <Badge variant="secondary" className="bg-secondary text-muted-foreground">
-            OFF
+            CLOSED
           </Badge>
         )}
       </div>

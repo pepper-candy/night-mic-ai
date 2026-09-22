@@ -81,6 +81,8 @@ export function GuestRoom({ code }: { code: string }) {
 
   if (!room) return null;
 
+  const accepting = isQueueAccepting(room);
+
   async function onCancel(id: string) {
     try {
       apply(await songAction(code, id, "cancel", { guestId }));
@@ -112,10 +114,12 @@ export function GuestRoom({ code }: { code: string }) {
 
       <div className="mt-4">
         <AddSongForm
+          key={accepting ? "queue-live" : "queue-closed"}
           code={code}
           onAdded={apply}
           asName={!nickname && isStaff ? (isHost ? "Host" : "Cohost") : undefined}
-          locked={!isStaff && !isQueueAccepting(room)}
+          accepting={accepting}
+          locked={!isStaff && !accepting}
           lockedMessage={queueClosedMessage(room)}
         />
       </div>
