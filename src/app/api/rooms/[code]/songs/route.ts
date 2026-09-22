@@ -13,6 +13,9 @@ export async function POST(
       title: body.title,
       artist: body.artist,
       url: body.url,
+      spotifyUrl: body.spotifyUrl,
+      language: body.language,
+      languageOther: body.languageOther,
       displayName: body.displayName,
       guestId: body.guestId,
     });

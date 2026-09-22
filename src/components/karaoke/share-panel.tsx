@@ -17,23 +17,34 @@ import { CheckIcon, CopyIcon, QrCodeIcon, Share2Icon } from "lucide-react";
 export function SharePanel({
   code,
   hostToken,
+  hasEvent,
 }: {
   code: string;
   hostToken?: string;
+  hasEvent?: boolean;
 }) {
-  const [copied, setCopied] = useState<"code" | "link" | null>(null);
+  const [copied, setCopied] = useState<"code" | "link" | "invite" | null>(null);
   const [qrOpen, setQrOpen] = useState(false);
   const shareUrl =
     typeof window === "undefined" ? `/room/${code}` : `${window.location.origin}/room/${code}`;
+  const inviteUrl =
+    typeof window === "undefined"
+      ? `/invite/${code}`
+      : `${window.location.origin}/invite/${code}`;
   const hostUrl =
     typeof window === "undefined"
       ? `/room/${code}/host`
       : `${window.location.origin}/room/${code}/host${hostToken ? `?host=${hostToken}` : ""}`;
 
-  async function copy(label: "code" | "link", value: string) {
+  async function copy(label: "code" | "link" | "invite", value: string) {
     await navigator.clipboard.writeText(value);
     setCopied(label);
-    toast.success(label === "code" ? "Code copied. Shout it." : "Join link copied.");
+    const messages = {
+      code: "Code copied. Shout it.",
+      link: "Join link copied.",
+      invite: "Invitation link copied.",
+    } as const;
+    toast.success(messages[label]);
     window.setTimeout(() => setCopied(null), 1600);
   }
 
@@ -42,15 +53,17 @@ export function SharePanel({
       try {
         await navigator.share({
           title: "Night Mic karaoke",
-          text: `Join the karaoke queue — code ${formatCode(code)}`,
-          url: shareUrl,
+          text: hasEvent
+            ? `You're invited — karaoke room ${formatCode(code)}`
+            : `Join the karaoke queue — code ${formatCode(code)}`,
+          url: hasEvent ? inviteUrl : shareUrl,
         });
         return;
       } catch {
         // User dismissed share sheet; fall through to copy.
       }
     }
-    await copy("link", shareUrl);
+    await copy(hasEvent ? "invite" : "link", hasEvent ? inviteUrl : shareUrl);
   }
 
   return (
@@ -66,7 +79,11 @@ export function SharePanel({
       </div>
       <div className="grid grid-cols-2 gap-2">
         <Button className="h-12" variant="outline" onClick={() => void copy("code", code)}>
-          {copied === "code" ? <CheckIcon data-icon="inline-start" /> : <CopyIcon data-icon="inline-start" />}
+          {copied === "code" ? (
+            <CheckIcon data-icon="inline-start" />
+          ) : (
+            <CopyIcon data-icon="inline-start" />
+          )}
           Copy code
         </Button>
         <Button className="h-12 neon-button" onClick={() => void nativeShare()}>
@@ -74,6 +91,18 @@ export function SharePanel({
           Share
         </Button>
       </div>
+      <Button
+        variant="outline"
+        className="h-11 w-full"
+        onClick={() => void copy("invite", inviteUrl)}
+      >
+        {copied === "invite" ? (
+          <CheckIcon data-icon="inline-start" />
+        ) : (
+          <CopyIcon data-icon="inline-start" />
+        )}
+        Copy invitation link
+      </Button>
       <Button variant="ghost" className="h-11 w-full" onClick={() => setQrOpen(true)}>
         <QrCodeIcon data-icon="inline-start" />
         Show join QR

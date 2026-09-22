@@ -2,12 +2,14 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { languageLabel, lyricsSearchButtonLabel, lyricsSearchUrl } from "@/lib/media";
 import { timeAgo } from "@/lib/time";
 import type { QueueItem } from "@/lib/types";
 import {
   ChevronDownIcon,
   ChevronUpIcon,
   ExternalLinkIcon,
+  PencilIcon,
   PlayIcon,
   Trash2Icon,
   XIcon,
@@ -18,26 +20,39 @@ export function SongRow({
   index,
   isOwn,
   isHost,
+  isStaff,
   canMoveUp,
   canMoveDown,
+  showPreview,
+  previewOpen,
+  onTogglePreview,
   onPlay,
   onRemove,
   onCancel,
   onMove,
+  onEdit,
 }: {
   song: QueueItem;
   index?: number;
   isOwn?: boolean;
   isHost?: boolean;
+  /** Host or cohost — can edit/remove. */
+  isStaff?: boolean;
   canMoveUp?: boolean;
   canMoveDown?: boolean;
+  showPreview?: boolean;
+  previewOpen?: boolean;
+  onTogglePreview?: () => void;
   onPlay?: () => void;
   onRemove?: () => void;
   onCancel?: () => void;
   onMove?: (direction: "up" | "down") => void;
+  onEdit?: () => void;
 }) {
+  const staff = Boolean(isStaff || isHost);
   const showHostQueueActions = Boolean(isHost && song.status === "queued" && (onPlay || onMove));
-  const showGuestCancel = Boolean(!isHost && isOwn && song.status === "queued" && onCancel);
+  const showGuestCancel = Boolean(!staff && isOwn && song.status === "queued" && onCancel);
+  const lang = languageLabel(song.language || "english", song.languageOther);
 
   return (
     <article className="glow-panel p-3.5">
@@ -52,6 +67,9 @@ export function SongRow({
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h3 className="truncate text-base font-semibold leading-tight">{song.title}</h3>
+                <Badge variant="secondary" className="bg-gold/15 text-gold">
+                  {lang}
+                </Badge>
                 {isOwn ? (
                   <Badge variant="secondary" className="bg-cyan/15 text-cyan">
                     You
@@ -60,21 +78,46 @@ export function SongRow({
               </div>
               <p className="truncate text-sm text-muted-foreground">{song.artist}</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                {song.submittedBy} · {timeAgo(song.createdAt)}
+                {song.submittedBy}
+                {song.modified ? " (modified)" : ""}
+                {" · "}
+                {timeAgo(song.createdAt)}
               </p>
-              {song.url ? (
+              <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1">
                 <a
-                  href={song.url}
+                  href={lyricsSearchUrl(song.title, song.language)}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-1 inline-flex items-center gap-1 text-sm text-cyan underline-offset-4 hover:underline"
+                  className="inline-flex max-w-full items-center gap-1 truncate text-sm text-gold underline-offset-4 hover:underline"
+                  title="Search lyrics on Google"
                 >
-                  Open track
-                  <ExternalLinkIcon className="size-3.5" />
+                  {lyricsSearchButtonLabel(song.title, song.language)}
                 </a>
-              ) : null}
+                {song.url ? (
+                  <a
+                    href={song.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 text-sm text-cyan underline-offset-4 hover:underline"
+                  >
+                    YouTube / karaoke
+                    <ExternalLinkIcon className="size-3.5" />
+                  </a>
+                ) : null}
+                {song.spotifyUrl ? (
+                  <a
+                    href={song.spotifyUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 text-sm text-cyan underline-offset-4 hover:underline"
+                  >
+                    Spotify
+                    <ExternalLinkIcon className="size-3.5" />
+                  </a>
+                ) : null}
+              </div>
             </div>
-            {isHost && onRemove ? (
+            {staff && onRemove ? (
               <Button
                 variant="destructive"
                 size="icon"
@@ -89,7 +132,7 @@ export function SongRow({
         </div>
       </div>
 
-      {showHostQueueActions || showGuestCancel ? (
+      {showHostQueueActions || showGuestCancel || (staff && onEdit) || showPreview ? (
         <div className="mt-3 flex flex-wrap gap-2">
           {showHostQueueActions && onPlay ? (
             <Button className="h-11 flex-1 text-sm" onClick={onPlay}>
@@ -120,6 +163,17 @@ export function SongRow({
                 <ChevronDownIcon />
               </Button>
             </>
+          ) : null}
+          {staff && onEdit ? (
+            <Button variant="outline" className="h-11 flex-1" onClick={onEdit}>
+              <PencilIcon data-icon="inline-start" />
+              Edit
+            </Button>
+          ) : null}
+          {showPreview && onTogglePreview ? (
+            <Button variant="outline" className="h-11 flex-1" onClick={onTogglePreview}>
+              {previewOpen ? "Hide preview" : "Preview link"}
+            </Button>
           ) : null}
           {showGuestCancel ? (
             <Button variant="outline" className="h-11 flex-1" onClick={onCancel}>

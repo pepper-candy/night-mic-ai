@@ -12,19 +12,22 @@ Built with Next.js (App Router), TypeScript, and Tailwind. Designed for phones f
 
 1. **Host** taps **Host this night**. Night Mic mints a shoutable code like `VIBE 42` and a host session on that device.
 2. Guests open the share link (`/room/VIBE42`) or type the code on the home page / `/join`.
-3. Each guest picks a display name and submits a song: **title + artist required**, optional YouTube or karaoke URL.
-4. Everyone in the room sees the same live queue. The host can:
+3. Each guest picks a display name and submits a song: **title + artist + language category required**, optional YouTube/karaoke and Spotify URLs. Language is **Cantonese**, **English**, or **Other** (with a short note) so the night stays mixed.
+4. Guests can **search as they type** in the title field (magnifier runs a full search). Matches autofill a clean title + artist, and streaming links when API keys are configured.
+5. Hosts can publish an **invitation** (`/invite/CODE`) with title, brief description, location, and start time — guests see a live countdown before joining the queue.
+6. Optional **link validation**: host turns it on and shares a **cohost link**. That second device embeds YouTube/Spotify previews, and host/cohost can edit any queued song (cards show `(modified)` after the requester’s name).
+7. Everyone in the room sees the same live queue. The host can:
    - promote a song to **now playing**
    - skip (marks current done and starts the next one)
    - move waiting songs up or down
-   - remove a song
+   - edit or remove a song
    - clear finished songs
    - seed three karaoke classics so the night starts in under a minute
-5. Guests can cancel **their own** waiting song. They cannot reorder or touch anyone else’s.
+8. Guests can cancel **their own** waiting song. They cannot reorder or touch anyone else’s.
 
 Rooms go idle after **24 hours** without updates and then disappear.
 
-Host controls stay on the device that created the room (cookie + local host token). There is a **host handoff link** on the host screen if you need to move the booth to another phone — do not share that link with the room.
+Host controls stay on the device that created the room (cookie + local host token). There is a **host handoff link** on the host screen if you need to move the booth to another phone — do not share that link with the room. The cohost link is only for a trusted validation phone.
 
 ## Quick start (local)
 
@@ -47,8 +50,12 @@ Copy `.env.example` to `.env.local` if you want Redis locally.
 | `UPSTASH_REDIS_REST_TOKEN` | On Vercel | Upstash Redis REST token |
 | `KV_REST_API_URL` | Alternative | Vercel KV REST URL (same protocol) |
 | `KV_REST_API_TOKEN` | Alternative | Vercel KV REST token |
+| `YOUTUBE_API_KEY` | Optional | YouTube Data API v3 — autofill a karaoke YouTube link on the top search hit |
+| `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` | Optional | Spotify Client Credentials — autofill Spotify track links in search |
 
 Either the Upstash pair **or** the Vercel KV pair is enough. If both are set, Upstash wins.
+
+Song search **always** works for title + artist via Apple’s free iTunes Search API (no key). YouTube/Spotify link autofill needs the optional keys above.
 
 **Persistence modes**
 
@@ -84,7 +91,7 @@ Origin and Vercel both speak git. Origin holds the source of truth for this work
 - Near-real-time sync via 1.5s polling (works on Vercel serverless; no long-lived socket server)
 - `@upstash/redis` when credentials are present
 
-Song entry is free text. There is no third-party karaoke catalog.
+Song entry is free text with optional catalog search (iTunes, plus Spotify/YouTube when keys are set).
 
 ## Hardening later (not in this MVP)
 

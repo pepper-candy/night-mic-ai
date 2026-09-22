@@ -1,0 +1,52 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { countdownParts } from "@/lib/time";
+
+function Pad({ value }: { value: number }) {
+  return <span className="tabular-nums">{String(value).padStart(2, "0")}</span>;
+}
+
+export function EventCountdown({ startsAt }: { startsAt: number }) {
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const parts = countdownParts(startsAt, now);
+
+  if (parts.done) {
+    return (
+      <div className="rounded-2xl border border-gold/40 bg-gold/10 px-4 py-5 text-center">
+        <p className="text-[11px] uppercase tracking-[0.28em] text-gold">It&apos;s time</p>
+        <p className="mt-2 font-display text-4xl tracking-wide text-gold">Doors are open</p>
+        <p className="mt-1 text-sm text-muted-foreground">Join the room and get on the list.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-2xl border border-cyan/30 bg-cyan/5 px-4 py-5 text-center">
+      <p className="text-[11px] uppercase tracking-[0.28em] text-cyan">Starts in</p>
+      <div className="mt-3 grid grid-cols-4 gap-2">
+        {[
+          { label: "Days", value: parts.days },
+          { label: "Hrs", value: parts.hours },
+          { label: "Min", value: parts.minutes },
+          { label: "Sec", value: parts.seconds },
+        ].map((unit) => (
+          <div key={unit.label} className="rounded-xl bg-secondary/80 px-2 py-3">
+            <p className="font-display text-3xl leading-none tracking-wide text-gold sm:text-4xl">
+              <Pad value={unit.value} />
+            </p>
+            <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              {unit.label}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
