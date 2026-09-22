@@ -1,74 +1,47 @@
-export function DescriptionNote({ text }: { text: string }) {
+import { sanitizeEventDescription } from "@/lib/validation";
+
+function EighthNote({ className }: { className?: string }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-gold/25 bg-[#1a0820]">
-      <svg
-        viewBox="0 0 360 160"
-        className="pointer-events-none absolute inset-0 h-full w-full"
-        aria-hidden
-        preserveAspectRatio="xMidYMid slice"
-      >
-        <defs>
-          <linearGradient id="descGlow" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#ff2f92" stopOpacity="0.28" />
-            <stop offset="55%" stopColor="#18e7ff" stopOpacity="0.12" />
-            <stop offset="100%" stopColor="#ffd24a" stopOpacity="0.2" />
-          </linearGradient>
-        </defs>
-        <rect width="360" height="160" fill="url(#descGlow)" />
-        <path
-          d="M24 38h312"
-          stroke="#ffd24a"
-          strokeOpacity="0.18"
-          strokeWidth="1"
-        />
-        <path
-          d="M24 58h312"
-          stroke="#18e7ff"
-          strokeOpacity="0.12"
-          strokeWidth="1"
-        />
-        <path
-          d="M24 78h312"
-          stroke="#ffd24a"
-          strokeOpacity="0.12"
-          strokeWidth="1"
-        />
-        <path
-          d="M24 98h312"
-          stroke="#18e7ff"
-          strokeOpacity="0.1"
-          strokeWidth="1"
-        />
-        <path
-          d="M24 118h312"
-          stroke="#ffd24a"
-          strokeOpacity="0.1"
-          strokeWidth="1"
-        />
-        <g fill="#ffd24a">
-          <circle cx="42" cy="44" r="5" />
-          <rect x="45" y="18" width="3" height="26" rx="1" />
-          <path d="M48 18c10 2 18 8 18 16" fill="none" stroke="#ffd24a" strokeWidth="2" />
-        </g>
-        <g fill="#18e7ff">
-          <circle cx="318" cy="112" r="4.5" />
-          <rect x="320.5" y="90" width="2.5" height="22" rx="1" />
-          <path d="M323 90c8 2 14 6 14 13" fill="none" stroke="#18e7ff" strokeWidth="2" />
-        </g>
-        <path
-          d="M168 22c2 8-4 12-4 18 4-2 10 0 12 6"
-          fill="none"
-          stroke="#ff2f92"
-          strokeOpacity="0.55"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-      </svg>
-      <div className="relative px-5 py-6">
-        <p className="font-display text-xl leading-snug tracking-wide text-gold/90 sm:text-2xl">
-          {text}
-        </p>
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      {/* Material music_note — solid ♪ glyph */}
+      <path
+        fill="currentColor"
+        d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"
+      />
+    </svg>
+  );
+}
+
+function BeamedNotes({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      {/* Heroicons musical-note — solid ♫-style pair */}
+      <path
+        fill="currentColor"
+        d="M19.952 1.651a.75.75 0 0 1 .298.599V16.303a3 3 0 0 1-2.206 2.885 2.25 2.25 0 1 1-1.769-4.168 1.5 1.5 0 0 0 1-1.387V7.348l-8 1.83v9.125a3 3 0 0 1-2.206 2.885 2.25 2.25 0 1 1-1.769-4.168 1.5 1.5 0 0 0 1-1.387V6.275a.75.75 0 0 1 .544-.724l10-2.286a.75.75 0 0 1 .658.086Z"
+      />
+    </svg>
+  );
+}
+
+/** Single-line invite brief with dim decorative note glyphs inside the pill. */
+export function DescriptionNote({ text }: { text: string }) {
+  const line = sanitizeEventDescription(text);
+  if (!line) return null;
+
+  return (
+    <div className="relative flex h-11 items-center overflow-hidden rounded-2xl border border-gold/20 bg-[#1a0820] px-3">
+      <div className="pointer-events-none absolute inset-0" aria-hidden>
+        <EighthNote className="absolute top-1.5 left-2 size-5 text-gold/20" />
+        <BeamedNotes className="absolute top-2 right-14 size-5 text-cyan/15" />
+        <EighthNote className="absolute top-1.5 right-2.5 size-5 text-gold/25" />
       </div>
+      <p
+        title={line}
+        className="relative min-w-0 flex-1 truncate px-7 text-center font-display text-base leading-none tracking-wide text-gold/90"
+      >
+        {line}
+      </p>
     </div>
   );
 }

@@ -117,7 +117,8 @@ export const MAX_NAME = 24;
 /** Encoded YouTube/Spotify search URLs for long CJK titles need more than 300. */
 export const MAX_URL = 2000;
 export const MAX_EVENT_TITLE = 80;
-export const MAX_EVENT_DESCRIPTION = 400;
+/** One-line invite pill on a phone; ellipsis if a stored value is longer. */
+export const MAX_EVENT_DESCRIPTION = 72;
 export const MAX_EVENT_LOCATION = 120;
 export const MAX_LANGUAGE_OTHER = 40;
 export const MAX_MESSAGE = 160;
